@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nurse Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+    <style>
+        /* CSS styles as provided previously */
+        :root {
+            --primary: #4f8cff;
+            --secondary: #1f2937;
+            --accent: linear-gradient(90deg, #4f8cff 0%, #8f6fff 100%);
+            --sidebar-bg: rgba(31, 41, 55, 0.8);
+            --glass-bg: rgba(255,255,255,0.25);
+            --glass-border: rgba(255,255,255,0.18);
+            --card-bg: rgba(255,255,255,0.65);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            --radius: 18px;
+            --transition: 0.3s cubic-bezier(.4,0,.2,1);
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background: linear-gradient(120deg, #e0e7ff 0%, #f8fafc 100%);
+            min-height: 100vh;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            color: #222;
+            letter-spacing: 0.01em;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .dashboard {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+        /* Add this inside your existing <style> block */
+         .patient-card p {
+           margin-bottom: 8px; /* Adds space between lines */
+           line-height: 1.4; /* Improves readability */
+        }
+         .patient-card p:last-child {
+           margin-bottom: 0; /* No margin after the last line */
+           }
+         /* Add this inside your existing <style> block, next to the general .alert rule */
+          .alert-success {
+           background: rgba(144, 238, 144, 0.15); /* Light green */
+            color: #2e8b57; /* Dark green */
+           border-left-color: #3cb371; /* Medium sea green */
+           }
+
+        .alert-error {
+           background: rgba(255, 99, 71, 0.15); /* Light red */
+           color: #cc0000; /* Dark red */
+           border-left-color: #ff4500; /* Orange red */
+           }
+        .sidebar {
+            background: var(--sidebar-bg);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid var(--glass-border);
+            width: 270px;
+            min-width: 220px;
+            padding: 32px 18px 24px 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            box-shadow: 2px 0 18px rgba(31,41,55,0.08);
+            z-index: 2;
+            transition: background var(--transition);
+        }
+
+        .sidebar h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 38px;
+            background: var(--accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 1px;
+            user-select: none;
+        }
+
+        .sidebar nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+        }
+
+        .sidebar nav ul li {
+            margin-bottom: 22px;
+        }
+
+        .sidebar nav ul li:last-child {
+            margin-bottom: 0;
+        }
+
+        .sidebar nav ul li button {
+            width: 100%;
+            background: none;
+            border: none;
+            color: #e0e7ff;
+            font-size: 1.18rem;
+            font-weight: 600;
+            padding: 14px 18px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            transition: background var(--transition), color var(--transition), box-shadow var(--transition);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar nav ul li button.active,
+        .sidebar nav ul li button:hover {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 3px 16px 0 rgba(79,140,255,0.10);
+            transform: translateY(-2px) scale(1.04);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 48px 42px 24px 42px;
+            background: transparent;
+            position: relative;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 36px;
+            height: 100vh;
+            scrollbar-width: thin;
+            scrollbar-color: #b3c6ff #e0e7ff;
+        }
+
+        .main-content::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .main-content::-webkit-scrollbar-thumb {
+            background: #b3c6ff;
+            border-radius: 8px;
+        }
+
+        .main-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .content-section {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 32px 34px 28px 34px;
+            margin-bottom: 0;
+            min-width: 320px;
+            max-width: 600px;
+            transition: box-shadow var(--transition), background var(--transition);
+            border: 1.5px solid var(--glass-border);
+            backdrop-filter: blur(8px);
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeInUp 0.7s;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .content-section h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 18px;
+            background: var(--accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 1px;
+        }
+
+        /* Profile Info */
+        .profile-info p {
+            font-size: 1.13rem;
+            margin: 10px 0;
+            padding: 7px 0;
+            border-bottom: 1px solid #e0e7ff44;
+        }
+
+        .profile-info p:last-child {
+            border-bottom: none;
+        }
+
+        /* Forms */
+        form label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: 600;
+            color: #3b3b3b;
+            letter-spacing: 0.2px;
+            font-size: 1.04rem;
+        }
+
+        form input[type="text"],
+        form input[type="number"],
+        form input[type="email"],
+        form input[type="tel"],
+        form input[type="date"] { /* Added type="date" */
+            width: 100%;
+            padding: 13px 14px;
+            margin-bottom: 18px;
+            border: 1.5px solid #b3c6ff;
+            border-radius: 9px;
+            font-size: 1rem;
+            background: rgba(255,255,255,0.85);
+            box-shadow: 0 1px 4px 0 rgba(79,140,255,0.06);
+            transition: border-color var(--transition), box-shadow var(--transition);
+        }
+
+        form input[type="text"]:focus,
+        form input[type="number"]:focus,
+        form input[type="email"]:focus,
+        form input[type="tel"]:focus,
+        form input[type="date"]:focus { /* Added type="date" */
+            border-color: #4f8cff;
+            outline: none;
+            box-shadow: 0 2px 8px 0 rgba(79,140,255,0.13);
+        }
+
+        button[type="submit"] {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 13px 32px;
+            font-size: 1.08rem;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 10px 0 rgba(79,140,255,0.10);
+            transition: background var(--transition), box-shadow var(--transition), transform var(--transition);
+            margin-top: 2px;
+            letter-spacing: 0.5px;
+        }
+
+        button[type="submit"]:hover {
+            background: linear-gradient(90deg, #8f6fff 0%, #4f8cff 100%);
+            box-shadow: 0 6px 18px 0 rgba(79,140,255,0.18);
+            transform: translateY(-2px) scale(1.04);
+        }
+
+        /* Alerts and Results */
+        .alert, #searchResults p {
+            background: rgba(79,140,255,0.08);
+            padding: 13px 16px;
+            border-radius: 8px;
+            font-style: italic;
+            color: #4661b6;
+            margin-top: 18px;
+            font-size: 1.05rem;
+            border-left: 4px solid #4f8cff;
+            box-shadow: 0 1px 6px 0 rgba(79,140,255,0.07);
+            animation: fadeIn 0.5s;
+        }
+
+        /* Patient Card */
+        .patient-card {
+            background: rgba(255,255,255,0.93);
+            border-radius: 11px;
+            box-shadow: 0 2px 12px 0 rgba(79,140,255,0.08);
+            padding: 18px 20px;
+            margin-bottom: 13px;
+            border: 1.5px solid #e0e7ff;
+            transition: box-shadow var(--transition), transform var(--transition);
+            animation: fadeInUp 0.5s;
+        }
+
+        .patient-card:hover {
+            box-shadow: 0 6px 32px 0 rgba(79,140,255,0.18);
+            transform: scale(1.025) translateY(-2px);
+            border-color: #4f8cff44;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1000px) {
+            .dashboard {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100vw;
+                min-width: 0;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                padding: 18px 14px;
+                box-shadow: none;
+            }
+
+            .sidebar h2 {
+                font-size: 1.3rem;
+                margin-bottom: 0;
+            }
+
+            .sidebar nav ul {
+                display: flex;
+                flex-direction: row;
+                gap: 8px;
+            }
+
+            .sidebar nav ul li {
+                margin: 0;
+            }
+
+            .main-content {
+                padding: 18px 8vw 14px 8vw;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .main-content {
+                padding: 8px 2vw 8px 2vw;
+            }
+
+            .content-section {
+                padding: 18px 7vw 16px 7vw;
+                min-width: 0;
+                max-width: 100vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <h2>Nurse Dashboard</h2>
+            <nav>
+                <ul>
+                    <li><button id="viewProfileBtn" class="active"><i class="fas fa-user-circle"></i> View Profile</button></li>
+                    <li><button id="searchPatientBtn"><i class="fas fa-search"></i> Search Patient</button></li>
+                    <li><button id="addTestResultsBtn"><i class="fas fa-flask"></i> Add Test Results</button></li>
+                    <li><button id="medicalHistoryBtn"><i class="fas fa-notes-medical"></i> Medical History</button></li>
+                    <li><button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <section id="profileView" class="content-section active">
+                <h3>Profile</h3>
+                <div class="profile-info">
+                    <p><strong>Name:</strong> <span id="profileName">Loading...</span></p>
+                    <p><strong>Email:</strong> <span id="profileEmail">Loading...</span></p>
+                    <p><strong>Role:</strong> <span id="profileRole">Loading...</span></p>
+                    <p><strong>Employee ID:</strong> <span id="profileNurseID">Loading...</span></p>
+                </div>
+            </section>
+
+            <section id="patientSearch" class="content-section">
+                <h3>Search Patient</h3>
+                <form id="searchPatientForm">
+                    <label for="searchName">Name:</label>
+                    <input type="text" id="searchName" name="searchName">
+                    <label for="searchDob">Date of Birth:</label>
+                    <input type="date" id="searchDob" name="searchDob">
+                    <label for="searchMobile">Mobile Number:</label>
+                    <input type="tel" id="searchMobile" name="searchMobile">
+                    <button type="submit">Search</button>
+                </form>
+                <div id="searchResults"></div>
+            </section>
+
+            <section id="addTestResults" class="content-section">
+            <h3>Add Test Results</h3>
+            <form id="addTestResultsForm">
+                <label for="patientID">Patient ID (Numeric):</label>
+                <input type="number" id="patientID" name="patientID" required placeholder="e.g., 1, 2, 3">
+
+                <label for="testName">Test Name:</label>
+                <input type="text" id="testName" name="testName" required placeholder="e.g., Blood Test, X-Ray">
+
+                <label for="labResultFile">Upload Result Document (PDF, JPG, PNG):</label>
+                <input type="file" id="labResultFile" name="labResultFile" accept=".pdf,.jpg,.jpeg,.png" required>
+
+                <label for="remarks">Remarks (Optional):</label>
+                <input type="text" id="remarks" name="remarks" placeholder="Any additional notes">
+
+                <button type="submit">Upload Result</button>
+            </form>
+            <div id="testResultAlert" class="alert" style="display:none;"></div>
+        </section>
+
+            <section id="medicalHistory" class="content-section">
+                <h3>Medical History</h3>
+                <div>
+                    <p>Feature coming soon! Here you will be able to view and manage patient medical histories.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Base URL for your backend API
+        const API_BASE_URL = 'http://localhost:3001/api'; // IMPORTANT: Ensure this matches your backend port from .env
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('token');
+            const userRole = localStorage.getItem('userRole');
+
+            // Access control: Redirect if no token or not a nurse
+            if (!token || userRole !== 'nurse') {
+                alert('Access Denied: Please log in as a nurse.');
+                window.location.href = 'login.html';
+                return; // Stop further execution
+            }
+
+            // Fetch user profile immediately on page load
+            fetchUserProfile(token);
+            showSection('profileView'); // Show profile view by default
+        });
+
+        async function fetchUserProfile(token) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/users/profile`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` // Send the JWT token for authentication
+                    }
+                });
+
+                if (!response.ok) {
+                    // If unauthorized, clear token and redirect to login
+                    if (response.status === 401) {
+                        alert('Session expired or unauthorized. Please log in again.');
+                        localStorage.clear();
+                        window.location.href = 'login.html';
+                    } else {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Failed to fetch profile.');
+                    }
+                }
+
+                const userData = await response.json();
+                console.log('Fetched User Data:', userData); // Log for debugging
+
+                // Update profile display with fetched data
+                document.getElementById('profileName').textContent = userData.name || 'N/A';
+                document.getElementById('profileEmail').textContent = userData.email || 'N/A';
+                document.getElementById('profileRole').textContent = userData.role || 'N/A';
+                document.getElementById('profileNurseID').textContent = userData.employeeId || 'N/A';
+
+            } catch (error) {
+                console.error('Error fetching profile:', error);
+                alert('Failed to load profile data: ' + error.message);
+            }
+        }
+
+        // --- Dashboard Navigation Logic ---
+        const navButtons = [
+            { btn: 'viewProfileBtn', section: 'profileView' },
+            { btn: 'searchPatientBtn', section: 'patientSearch' },
+            { btn: 'addTestResultsBtn', section: 'addTestResults' },
+            { btn: 'medicalHistoryBtn', section: 'medicalHistory' }
+        ];
+
+        function showSection(sectionId) {
+            // Hide all content sections
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+            // Show the target section
+            document.getElementById(sectionId).classList.add('active');
+            // Update active state of navigation buttons
+            navButtons.forEach(({btn, section}) => {
+                document.getElementById(btn).classList.toggle('active', section === sectionId);
+            });
+        }
+
+        // Attach event listeners to navigation buttons
+        navButtons.forEach(({btn, section}) => {
+            document.getElementById(btn).addEventListener('click', () => showSection(section));
+        });
+
+        // --- Patient Search (Integrated with Backend API - requires backend update) ---
+        document.getElementById('searchPatientForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); // Prevent default form submission
+
+            const searchName = document.getElementById('searchName').value.trim();
+            const searchDob = document.getElementById('searchDob').value.trim(); // Get Date of Birth input
+            const searchMobile = document.getElementById('searchMobile').value.trim();
+            const searchResultsDiv = document.getElementById('searchResults');
+            searchResultsDiv.innerHTML = ''; // Clear previous results
+
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('You are not logged in. Redirecting to login.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                // Construct query parameters based on available input
+                const queryParams = new URLSearchParams();
+                if (searchName) queryParams.append('name', searchName);
+                if (searchDob) queryParams.append('dob', searchDob); // Send as 'dob' query parameter
+                if (searchMobile) queryParams.append('mobileNumber', searchMobile);
+
+                const response = await fetch(`${API_BASE_URL}/patients/search?${queryParams.toString()}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` // Send the JWT token
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to search patients.');
+                }
+
+                const patientsFound = await response.json();
+                console.log('Patients Found:', patientsFound); // Debugging
+
+                if (patientsFound.length === 0) {
+                    searchResultsDiv.innerHTML = "<p class='alert'>No patients found matching your criteria.</p>";
+                } else {
+                     searchResultsDiv.innerHTML = patientsFound.map(p =>
+                    `<div class="patient-card" data-patient-id="${p._id}">
+                        <p><strong>Name:</strong> ${p.fullName || 'N/A'}</p>
+                        <p><strong>Date of Birth:</strong> ${p.dob ? new Date(p.dob).toLocaleDateString() : 'N/A'}</p>
+                        <p><strong>Gender:</strong> ${p.gender || 'N/A'}</p>
+                        <p><strong>Mobile:</strong> ${p.phoneNumber || 'N/A'}</p>
+                        <p><strong>Patient ID:</strong> ${p.patientId || 'N/A'}</p>
+                        <p><strong>Address:</strong> ${p.residentialAddress || 'N/A'}</p>
+                        <p><strong>Medical History:</strong> ${p.medicalHistory || 'No history recorded'}</p>
+                    </div>`
+                ).join('');
+                }
+
+            } catch (error) {
+                console.error('Error searching patients:', error);
+                searchResultsDiv.innerHTML = `<p class="alert" style="color: red;">Error: ${error.message}</p>`;
+            }
+        });
+
+        // --- Hardcoded Add Test Results (Needs Backend Integration in next steps) ---
+        // This currently only shows a success message.
+        // In the next step, we will replace this with an API call to your backend patientRoutes.
+        // --- Add Test Results (Connected to Backend) ---
+    document.getElementById('addTestResultsForm').addEventListener('submit', async function(e) {
+        e.preventDefault(); // Prevent default form submission
+
+        const patientID = document.getElementById('patientID').value.trim();
+        const testName = document.getElementById('testName').value.trim();
+        const labResultFile = document.getElementById('labResultFile').files[0]; // Get the selected file
+        const remarks = document.getElementById('remarks').value.trim();
+        const alertDiv = document.getElementById('testResultAlert');
+
+        alertDiv.style.display = 'none'; // Hide previous alerts
+        alertDiv.classList.remove('alert-success', 'alert-error'); // Clean classes
+
+        // Basic client-side validation
+        if (!patientID || !testName || !labResultFile) {
+            alertDiv.textContent = 'Please fill in Patient ID, Test Name, and upload a document.';
+            alertDiv.classList.add('alert-error'); // Add a class for error styling (you might need to define this in CSS)
+            alertDiv.style.display = 'block';
+            return;
+        }
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('You are not logged in. Redirecting to login.');
+            window.location.href = 'login.html';
+            return;
+        }
+
+        console.log('Raw patientID input value:', document.getElementById('patientID').value);
+            console.log('Trimmed patientID variable:', patientID);
+            console.log('Full URL being requested:', `${API_BASE_URL}/patients/${patientID}/lab-results`);
+            // --- END CONSOLE.LOGS ---
+
+        // Create FormData object to send file and other text data
+        const formData = new FormData();
+        formData.append('testName', testName);
+        formData.append('labResultFile', labResultFile); // 'labResultFile' must match the Multer field name in backend
+        formData.append('remarks', remarks);
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/patients/${patientID}/lab-results`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}` // No 'Content-Type' for FormData; browser sets it automatically
+                },
+                body: formData // Send FormData object
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to upload lab result.');
+            }
+
+            alertDiv.textContent = data.message || 'Lab result uploaded successfully!';
+            alertDiv.classList.add('alert-success'); // Add success styling class
+            alertDiv.style.display = 'block';
+            e.target.reset(); // Clear the form
+
+        } catch (error) {
+            console.error('Error uploading lab result:', error);
+            alertDiv.textContent = `Error: ${error.message}`;
+            alertDiv.classList.add('alert-error'); // Add error styling class
+            alertDiv.style.display = 'block';
+        } finally {
+            setTimeout(() => { alertDiv.style.display = 'none'; }, 5000); // Hide after 5 seconds
+        }
+    });
+
+        // --- Logout Functionality ---
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            localStorage.removeItem('token');    // Remove the JWT token
+            localStorage.removeItem('userRole'); // Remove the user's role
+            alert('You have been logged out.');
+            window.location.href = 'login.html'; // Redirect to login page
+        });
+    </script>
+</body>
+</html>

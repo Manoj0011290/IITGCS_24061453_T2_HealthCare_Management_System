@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Patient Details Tabs with Validation</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(120deg, #e0e7ff 0%, #f8fafc 100%);
+    margin: 0;
+    padding: 0;
+    color: #333;
+    min-height: 100vh;
+  }
+  .container {
+    max-width: 500px;
+    margin: 48px auto;
+    background: rgba(255,255,255,0.97);
+    padding: 32px 20px 28px 20px;
+    border-radius: 18px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.13);
+    animation: fadeInUp 0.8s;
+  }
+  h1 {
+    text-align: center;
+    color: #4f8cff;
+    font-size: 2rem;
+    margin-bottom: 24px;
+    letter-spacing: 1px;
+    font-weight: 800;
+    background: linear-gradient(90deg, #4f8cff 0%, #8f6fff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .tabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 28px;
+    gap: 8px;
+  }
+  .tab-btn {
+    flex: 1 1 0;
+    padding: 13px 0;
+    background: none;
+    border: none;
+    font-size: 1.13rem;
+    font-weight: 700;
+    color: #4f8cff;
+    border-radius: 10px 10px 0 0;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+    border-bottom: 3px solid transparent;
+    outline: none;
+  }
+  .tab-btn.active {
+    background: linear-gradient(90deg, #4f8cff 0%, #8f6fff 100%);
+    color: #fff;
+    border-bottom: 3px solid #4f8cff;
+    box-shadow: 0 2px 10px 0 rgba(79,140,255,0.09);
+    transform: translateY(2px) scale(1.04);
+  }
+  .tab-section {
+    display: none;
+    animation: fadeIn 0.7s;
+  }
+  .tab-section.active {
+    display: block;
+    animation: fadeIn 0.7s;
+  }
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 17px;
+  }
+  .form-group label {
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #2c3e50;
+    letter-spacing: 0.2px;
+  }
+  .form-group input, .form-group select {
+    padding: 11px 13px;
+    border: 1.5px solid #b3c6ff;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: rgba(255,255,255,0.97);
+    transition: border-color 0.3s, box-shadow 0.3s;
+    box-shadow: 0 1px 4px 0 rgba(79,140,255,0.06);
+  }
+  .form-group input:focus, .form-group select:focus {
+    border-color: #4f8cff;
+    outline: none;
+    box-shadow: 0 2px 8px 0 rgba(79,140,255,0.12);
+  }
+  .optional {
+    font-style: italic;
+    color: #888;
+    font-size: 0.93rem;
+    margin-left: 8px;
+    font-weight: 400;
+  }
+  .button-group {
+    display: flex;
+    /* CHANGED THIS LINE: */
+    justify-content: space-between; /* Was: justify-content: flex-end; */
+    gap: 12px;
+    margin-top: 18px;
+}
+/* ADDED THIS NEW CSS BLOCK for the back button */
+.back-btn {
+    background: #95a5a6; /* A neutral color */
+}
+.back-btn:hover {
+    background: #7f8c8d; /* Darker on hover */
+}
+  button {
+    padding: 14px 28px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    color: #fff;
+    letter-spacing: 1px;
+    transition: background 0.3s, box-shadow 0.3s, transform 0.3s;
+    box-shadow: 0 4px 18px 0 rgba(79,140,255,0.10);
+    background: linear-gradient(90deg, #4f8cff 0%, #8f6fff 100%);
+  }
+  button:hover {
+    background: linear-gradient(90deg, #8f6fff 0%, #4f8cff 100%);
+    box-shadow: 0 8px 32px 0 rgba(79,140,255,0.16);
+    filter: brightness(1.07);
+    transform: translateY(-2px) scale(1.04);
+  }
+  .success-message {
+    display: none;
+    text-align: center;
+    margin-top: 18px;
+    color: #27ae60;
+    font-weight: 700;
+    font-size: 1.1rem;
+    animation: fadeIn 0.6s;
+  }
+  @media (max-width: 700px) {
+    .container { padding: 12px 3vw 18px 3vw; }
+    h1 { font-size: 1.6rem; }
+    .tab-btn { font-size: 1rem; }
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(40px);}
+    to { opacity: 1; transform: translateY(0);}
+  }
+  @keyframes fadeIn {
+    from { opacity: 0;}
+    to { opacity: 1;}
+  }
+</style>
+</head>
+<body>
+  <form class="container" id="patientForm" autocomplete="off" novalidate>
+    <h1>Patient Details</h1>
+    <div class="tabs">
+      <button type="button" class="tab-btn active" id="tabPersonal">Personal Details</button>
+      <button type="button" class="tab-btn" id="tabContact">Contact Information</button>
+    </div>
+
+    <div class="tab-section active" id="personalSection">
+      <div class="form-group">
+        <label for="fullName">Full Name</label>
+        <input type="text" id="fullName" name="fullName" placeholder="Enter full name" required />
+      </div>
+      <div class="form-group">
+        <label for="dob">Date of Birth (DOB)</label>
+        <input type="date" id="dob" name="dob" required />
+      </div>
+      <div class="form-group">
+        <label for="gender">Gender</label>
+        <select id="gender" name="gender" required>
+          <option value="">Select gender</option>
+          <option>Male</option>
+          <option>Female</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="bloodGroup">Blood Group</label>
+        <select id="bloodGroup" name="bloodGroup" required>
+          <option value="">Select blood group</option>
+          <option>A+</option>
+          <option>A-</option>
+          <option>B+</option>
+          <option>B-</option>
+          <option>AB+</option>
+          <option>AB-</option>
+          <option>O+</option>
+          <option>O-</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="maritalStatus">Marital Status</label>
+        <select id="maritalStatus" name="maritalStatus" required>
+          <option value="">Select status</option>
+          <option>Single</option>
+          <option>Married</option>
+          <option>Divorced</option>
+          <option>Widowed</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="nationality">Nationality</label>
+        <input type="text" id="nationality" name="nationality" placeholder="Enter nationality" required />
+      </div>
+      <div class="form-group">
+        <label for="occupation">Occupation</label>
+        <input type="text" id="occupation" name="occupation" placeholder="Enter occupation" required />
+      </div>
+      <div class="form-group">
+        <label for="religion">Religion <span class="optional">(optional)</span></label>
+        <input type="text" id="religion" name="religion" placeholder="Enter religion" />
+      </div>
+      <div class="button-group">
+        <button type="button" class="back-btn" id="backToDashboardBtnPersonal">Back</button>
+        <button type="button" id="nextBtn">Next</button>
+      </div>
+    </div>
+
+    <div class="tab-section" id="contactSection">
+      <div class="form-group">
+        <label for="phoneNumber">Phone Number</label>
+        <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="Enter phone number" required />
+      </div>
+      <div class="form-group">
+        <label for="emailAddress">Email Address</label>
+        <input type="email" id="emailAddress" name="emailAddress" placeholder="Enter email address" required />
+      </div>
+      <div class="form-group">
+        <label for="residentialAddress">Residential Address</label>
+        <input type="text" id="residentialAddress" name="residentialAddress" placeholder="Enter address" required />
+      </div>
+      <div class="form-group">
+        <label for="emergencyContactName">Emergency Contact Name & Number</label>
+        <input type="text" id="emergencyContactName" name="emergencyContactName" placeholder="Enter emergency contact name & number" required />
+      </div>
+      <div class="form-group">
+        <label for="relationshipToEmergencyContact">Relationship to Emergency Contact</label>
+        <input type="text" id="relationshipToEmergencyContact" name="relationshipToEmergencyContact" placeholder="Enter relationship" required />
+      </div>
+      <div class="button-group">
+        <button type="button" class="back-btn" id="backToDashboardBtnContact">Back</button>
+        <button type="submit" id="submitBtn">Submit</button>
+      </div>
+    </div>
+
+    <div class="success-message" id="successMsg">Patient record submitted successfully!</div>
+  </form>
+
+  <script>
+    const tabPersonal = document.getElementById('tabPersonal');
+    const tabContact = document.getElementById('tabContact');
+    const personalSection = document.getElementById('personalSection');
+    const contactSection = document.getElementById('contactSection');
+    const nextBtn = document.getElementById('nextBtn');
+    const form = document.getElementById('patientForm');
+    const successMsg = document.getElementById('successMsg');
+    const backToDashboardBtnPersonal = document.getElementById('backToDashboardBtnPersonal');
+    const backToDashboardBtnContact = document.getElementById('backToDashboardBtnContact');
+
+    function getAuthToken() {
+      return localStorage.getItem('token');
+    }
+
+    function validateSection(section) {
+      const inputs = section.querySelectorAll('input[required], select[required]');
+      for (let input of inputs) {
+        if (!input.value.trim()) {
+          input.focus();
+          alert('Please fill all required fields before proceeding.');
+          return false;
+        }
+      }
+      return true;
+    }
+
+    function showPersonal() {
+      tabPersonal.classList.add('active');
+      tabContact.classList.remove('active');
+      personalSection.classList.add('active');
+      contactSection.classList.remove('active');
+    }
+
+    function showContactWithValidation() {
+      if (validateSection(personalSection)) {
+        tabContact.classList.add('active');
+        tabPersonal.classList.remove('active');
+        contactSection.classList.add('active');
+        personalSection.classList.remove('active');
+      }
+    }
+
+    tabContact.addEventListener('click', showContactWithValidation);
+    tabPersonal.addEventListener('click', showPersonal);
+    nextBtn.addEventListener('click', showContactWithValidation);
+
+    backToDashboardBtnPersonal.addEventListener('click', () => {
+      window.location.href = 'receptionist_dashboard.html';
+    });
+
+    backToDashboardBtnContact.addEventListener('click', () => {
+      window.location.href = 'receptionist_dashboard.html';
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (!validateSection(contactSection)) return;
+
+      const formData = {
+        fullName: document.getElementById('fullName').value,
+        dob: document.getElementById('dob').value,
+        gender: document.getElementById('gender').value,
+        bloodGroup: document.getElementById('bloodGroup').value,
+        maritalStatus: document.getElementById('maritalStatus').value,
+        nationality: document.getElementById('nationality').value,
+        occupation: document.getElementById('occupation').value,
+        religion: document.getElementById('religion').value,
+        phoneNumber: document.getElementById('phoneNumber').value,
+        emailAddress: document.getElementById('emailAddress').value,
+        residentialAddress: document.getElementById('residentialAddress').value,
+        emergencyContactName: document.getElementById('emergencyContactName').value,
+        relationshipToEmergencyContact: document.getElementById('relationshipToEmergencyContact').value,
+      };
+
+      try {
+        const token = getAuthToken();
+        if (!token) {
+          alert('Authentication token not found. Please log in.');
+          window.location.href = 'login.html';
+          return;
+        }
+
+        const response = await fetch('http://localhost:3001/api/patients', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(formData),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          successMsg.textContent = `Patient ${data.fullName} registered successfully with ID: ${data.patientId}!`;
+          successMsg.style.backgroundColor = '#d4edda';
+          successMsg.style.color = '#155724';
+          successMsg.style.padding = '10px';
+          successMsg.style.borderRadius = '5px';
+          successMsg.style.display = 'block';
+
+          setTimeout(() => {
+            successMsg.style.display = 'none';
+            form.reset();
+            showPersonal();
+          }, 3000);
+        } else {
+          alert(`Error: ${data.message || 'Something went wrong on the server.'}`);
+          console.error('Error registering patient:', data);
+          successMsg.textContent = `Error: ${data.message || 'Could not register patient.'}`;
+          successMsg.style.backgroundColor = '#f8d7da';
+          successMsg.style.color = '#721c24';
+          successMsg.style.padding = '10px';
+          successMsg.style.borderRadius = '5px';
+          successMsg.style.display = 'block';
+          setTimeout(() => {
+            successMsg.style.display = 'none';
+          }, 5000);
+        }
+      } catch (error) {
+        console.error('Network or unexpected error:', error);
+        alert('A network error occurred. Please try again.');
+        successMsg.textContent = 'A network error occurred. Please try again.';
+        successMsg.style.backgroundColor = '#f8d7da';
+        successMsg.style.color = '#721c24';
+        successMsg.style.padding = '10px';
+        successMsg.style.borderRadius = '5px';
+        successMsg.style.display = 'block';
+        setTimeout(() => {
+          successMsg.style.display = 'none';
+        }, 5000);
+      }
+    });
+  </script>
+</body>
+</html>

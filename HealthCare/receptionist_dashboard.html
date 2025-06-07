@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Receptionist Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+  <style>
+    /* Paste full CSS content from your code here... */
+    :root {
+      --primary: #4f8cff;
+      --accent: linear-gradient(90deg, #4f8cff 0%, #8f6fff 100%);
+      --sidebar-bg: rgba(31, 41, 55, 0.96);
+      --glass-bg: rgba(255,255,255,0.25);
+      --glass-border: rgba(255,255,255,0.18);
+      --card-bg: rgba(255,255,255,0.8);
+      --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.13);
+      --radius: 18px;
+      --transition: 0.3s cubic-bezier(.4,0,.2,1);
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      background: linear-gradient(120deg, #e0e7ff 0%, #f8fafc 100%);
+      min-height: 100vh;
+    }
+    body {
+      font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+      color: #222;
+      letter-spacing: 0.01em;
+      overflow: hidden;
+    }
+    .dashboard {
+      display: flex;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+    }
+    .sidebar {
+      background: var(--sidebar-bg);
+      backdrop-filter: blur(12px);
+      border-right: 1px solid var(--glass-border);
+      width: 250px;
+      min-width: 180px;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      box-shadow: 2px 0 18px rgba(31,41,55,0.08);
+      z-index: 2;
+      transition: background var(--transition);
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #b3c6ff #2c3e50;
+    }
+    .sidebar::-webkit-scrollbar {
+      width: 8px;
+    }
+    .sidebar::-webkit-scrollbar-thumb {
+      background: #b3c6ff;
+      border-radius: 6px;
+    }
+    .sidebar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .sidebar-header {
+      width: 100%;
+      padding: 32px 18px 16px 18px;
+      box-sizing: border-box;
+    }
+    .sidebar h2 {
+      font-size: 2rem;
+      font-weight: 800;
+      background: var(--accent);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 1px;
+      user-select: none;
+      margin: 0;
+    }
+    .sidebar nav {
+      width: 100%;
+      flex: 1;
+      padding-bottom: 24px;
+    }
+    .sidebar nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      width: 100%;
+    }
+    .sidebar nav ul li {
+      margin-bottom: 14px;
+    }
+    .sidebar nav ul li:last-child {
+      margin-bottom: 0;
+    }
+    .sidebar nav ul li button {
+      width: 100%;
+      background: none;
+      border: none;
+      color: #e0e7ff;
+      font-size: 1.13rem;
+      font-weight: 600;
+      padding: 13px 18px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: background var(--transition), color var(--transition), box-shadow var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sidebar nav ul li button.active,
+    .sidebar nav ul li button:hover {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 3px 16px 0 rgba(79,140,255,0.10);
+      transform: translateY(-2px) scale(1.04);
+    }
+    .main-content {
+      flex: 1;
+      padding: 36px 36px 24px 36px;
+      background: transparent;
+      position: relative;
+      overflow-y: auto;
+      height: 100vh;
+      scrollbar-width: thin;
+      scrollbar-color: #b3c6ff #e0e7ff;
+    }
+    .main-content::-webkit-scrollbar {
+      width: 10px;
+    }
+    .main-content::-webkit-scrollbar-thumb {
+      background: #b3c6ff;
+      border-radius: 8px;
+    }
+    .main-content::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .section {
+      display: none;
+      animation: fadeInUp 0.7s;
+    }
+    .section.active {
+      display: block;
+    }
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 36px 32px 28px 32px;
+      max-width: 480px;
+      width: 100%;
+      margin: 0 auto 24px auto;
+      animation: fadeInUp 0.7s;
+    }
+    .card h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 18px;
+      color: #4f8cff;
+      letter-spacing: 1px;
+    }
+    label {
+      font-weight: 600;
+      margin-bottom: 5px;
+      display: block;
+      color: #333;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      margin-bottom: 14px;
+      border: 1.5px solid #b3c6ff;
+      border-radius: 7px;
+      font-size: 1rem;
+      background: rgba(255,255,255,0.85);
+      transition: border-color 0.3s;
+    }
+    input:focus, select:focus {
+      border-color: #4f8cff;
+      outline: none;
+    }
+    button, .action-btn {
+      background: linear-gradient(90deg, #4f8cff 0%, #8f6fff 100%);
+      color: #fff;
+      border: none;
+      padding: 12px 28px;
+      font-size: 1.08rem;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s, box-shadow 0.3s, transform 0.3s;
+      margin-right: 10px;
+      margin-top: 2px;
+    }
+    button:hover, .action-btn:hover {
+      background: linear-gradient(90deg, #8f6fff 0%, #4f8cff 100%);
+      box-shadow: 0 6px 18px 0 rgba(79,140,255,0.18);
+      transform: translateY(-2px) scale(1.04);
+    }
+    .actions {
+      display: flex;
+      justify-content: flex-start;
+      gap: 10px;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 16px 0 0 0;
+    }
+    ul li {
+      margin-bottom: 7px;
+      color: #333;
+    }
+    .status-available {
+      color: green;
+      font-weight: 700;
+    }
+    .status-break {
+      color: orange;
+      font-weight: 700;
+    }
+    .status-unavailable {
+      color: red;
+      font-weight: 700;
+    }
+    .note {
+      font-size: 0.98rem;
+      color: #888;
+      margin-top: 18px;
+    }
+    .stat {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #4f8cff;
+      margin-bottom: 5px;
+    }
+    .stat-label {
+      color: #666;
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+    /* Alert styles */
+    .alert {
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      display: none; /* Hidden by default */
+      font-weight: 600;
+    }
+    .alert-success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .alert-error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    @media (max-width: 1100px) {
+      .main-content {
+        padding: 18px 4vw 14px 4vw;
+      }
+      .card {
+        max-width: 98vw;
+      }
+    }
+    @media (max-width: 700px) {
+      .main-content {
+        padding: 8px 2vw 8px 2vw;
+      }
+      .sidebar {
+        width: 100vw;
+        min-width: 0;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 0;
+        box-shadow: none;
+        height: 70px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 10;
+      }
+      .sidebar-header {
+        padding: 12px 12px 12px 18px;
+      }
+      .sidebar nav ul {
+        display: flex;
+        flex-direction: row;
+        gap: 0;
+        width: 100vw;
+        overflow-x: auto;
+        padding: 0;
+      }
+      .sidebar nav ul li {
+        margin: 0;
+      }
+      .sidebar nav ul li button {
+        font-size: 0.98rem;
+        padding: 10px 10px;
+        min-width: 120px;
+      }
+      .main-content {
+        margin-top: 80px;
+      }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2>Receptionist</h2>
+      </div>
+      <nav>
+        <ul>
+          <li><button id="bookCancelRescheduleBtn" class="active" onclick="showSection(0)" data-section="0"><i class="fas fa-calendar-alt"></i> Book/Cancel/Reschedule</button></li>
+          <li><button onclick="redirectToPatientRegistration()"><i class="fas fa-user-plus"></i> Patient Registration</button></li>
+          <li><button id="doctorAvailabilityBtn" onclick="showSection(1)" data-section="1"><i class="fas fa-user-md"></i> Doctor Availability</button></li>
+          <li><button id="sendRemindersBtn" onclick="showSection(2)" data-section="2"><i class="fas fa-bell"></i> Send Reminders</button></li>
+          <li><button id="billingInfoBtn" onclick="showSection(3)" data-section="3"><i class="fas fa-file-invoice-dollar"></i> Billing Info</button></li>
+          <li><button id="printSlipBtn" onclick="showSection(4)" data-section="4"><i class="fas fa-print"></i> Print Slip</button></li>
+          <li><button id="visitorStatsBtn" onclick="showSection(5)" data-section="5"><i class="fas fa-chart-bar"></i> Visitor Stats</button></li>
+          <li><button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button></li>
+        </ul>
+      </nav>
+    </aside>
+    <main class="main-content">
+      <section class="section active">
+        <div class="card">
+          <h2>Book/Cancel/Reschedule Appointment</h2>
+          <div id="apptAlert" class="alert"></div>
+          <form id="apptForm">
+            <label for="patientNameAppt">Patient Name</label>
+            <input type="text" id="patientNameAppt" required>
+            <label for="doctor">Doctor</label>
+            <select id="doctor" required>
+              <option value="">Select Doctor</option>
+              </select>
+            <label for="datetime">Date & Time</label>
+            <input type="datetime-local" id="datetime" required>
+            <div class="actions">
+              <button type="submit">Book</button>
+              <button type="button" class="action-btn" onclick="alert('Cancel functionality not yet implemented.')">Cancel</button>
+              <button type="button" class="action-btn" onclick="alert('Reschedule functionality not yet implemented.')">Reschedule</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="card">
+          <h2>Doctor Availability</h2>
+          <ul id="doctorAvailabilityList">
+            <li>Loading doctor availability...</li>
+          </ul>
+          <div class="note">Doctor schedules auto-update every 10 min. (backend integration required)</div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="card">
+          <h2>Send Appointment Reminder</h2>
+          <div id="reminderAlert" class="alert"></div>
+          <form id="reminderForm">
+            <label for="contactReminder">Patient Email/Phone</label>
+            <input type="text" id="contactReminder" required placeholder="Email or Phone Number" />
+            <label for="type">Type</label>
+            <select id="type">
+              <option value="email">Email</option>
+              <option value="sms">SMS</option>
+            </select>
+            <button type="submit">Send Reminder</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="card">
+          <h2>Insurance / Billing Info</h2>
+          <div id="billingAlert" class="alert"></div>
+          <form id="billingForm">
+            <label for="billPatientName">Patient Name</label>
+            <input type="text" id="billPatientName" required />
+            <label for="insurance">Insurance Provider</label>
+            <input type="text" id="insurance" />
+            <label for="billingAmount">Amount</label>
+            <input type="number" id="billingAmount" min="0" />
+            <button type="submit">Update Billing</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="card">
+          <h2>Print Appointment Slip / Registration Card</h2>
+          <div id="printAlert" class="alert"></div>
+          <form id="printForm">
+            <label for="printPatient">Patient Name</label>
+            <input type="text" id="printPatient" required />
+            <button type="submit">Print Slip</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="card" style="text-align:center;">
+          <h2>Daily Visitor Statistics</h2>
+          <div class="stat" id="visitorStat">52</div>
+          <div class="stat-label">Visitors Today</div>
+          <div class="note">Peak hours: 10am-12pm (backend integration required)</div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // Base URL for your backend API
+    const API_BASE_URL = 'http://localhost:3001/api'; // IMPORTANT: Ensure this matches your backend port from .env
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const token = localStorage.getItem('token');
+      const userRole = localStorage.getItem('userRole');
+
+      if (!token || userRole !== 'receptionist') {
+        alert('Access Denied: Please log in as a receptionist.');
+        window.location.href = 'login.html';
+        return; // Stop further execution
+      }
+
+      // Initial section display
+      showSection(0);
+      // Fetch doctors on page load for the appointment booking section
+      fetchDoctors();
+      // Initially fetch doctor availability (dummy data for now)
+      updateDoctorAvailability();
+    });
+
+    // --- Helper for showing section alerts ---
+    function showAlert(alertDivId, message, type) {
+        const alertDiv = document.getElementById(alertDivId);
+        alertDiv.textContent = message;
+        alertDiv.className = `alert alert-${type}`; // Use classes for styling
+        alertDiv.style.display = 'block';
+        setTimeout(() => { alertDiv.style.display = 'none'; }, 5000); // Hide after 5 seconds
+    }
+
+    // --- Dynamic Section Switching ---
+    const navButtons = [
+        { btnId: 'bookCancelRescheduleBtn', sectionId: 'bookCancelRescheduleSection', index: 0 },
+        // Patient Registration button does not switch sections, it redirects
+        { btnId: 'doctorAvailabilityBtn', sectionId: 'doctorAvailabilitySection', index: 1 },
+        { btnId: 'sendRemindersBtn', sectionId: 'sendRemindersSection', index: 2 },
+        { btnId: 'billingInfoBtn', sectionId: 'billingInfoSection', index: 3 },
+        { btnId: 'printSlipBtn', sectionId: 'printSlipSection', index: 4 },
+        { btnId: 'visitorStatsBtn', sectionId: 'visitorStatsSection', index: 5 }
+    ];
+
+    function showSection(sectionIdx) {
+      // Hide all content sections
+      document.querySelectorAll('.main-content .section').forEach(sec => sec.classList.remove('active'));
+      // Show the target section
+      document.querySelectorAll('.main-content .section')[sectionIdx].classList.add('active');
+
+      // Update active state of navigation buttons
+      document.querySelectorAll('.sidebar nav ul li button').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.querySelector(`.sidebar nav ul li button[data-section="${sectionIdx}"]`);
+      if (activeBtn) {
+        activeBtn.classList.add('active');
+      }
+    }
+
+    // Attach event listeners to navigation buttons (using data-section for clarity)
+    // You'll need to update the HTML buttons to have proper IDs and data-section attributes
+    // Example: <button id="bookCancelRescheduleBtn" onclick="showSection(0)" data-section="0">
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userRole');
+        alert('You have been logged out.');
+        window.location.href = 'login.html';
+    });
+
+    // Re-attach event listeners to buttons using the new IDs
+    // (Ensure your HTML buttons have IDs like 'bookCancelRescheduleBtn', 'doctorAvailabilityBtn', etc.)
+    document.getElementById('bookCancelRescheduleBtn').addEventListener('click', () => showSection(0));
+    document.getElementById('doctorAvailabilityBtn').addEventListener('click', () => showSection(1));
+    document.getElementById('sendRemindersBtn').addEventListener('click', () => showSection(2));
+    document.getElementById('billingInfoBtn').addEventListener('click', () => showSection(3));
+    document.getElementById('printSlipBtn').addEventListener('click', () => showSection(4));
+    document.getElementById('visitorStatsBtn').addEventListener('click', () => showSection(5));
+
+    // For patient registration redirect
+    function redirectToPatientRegistration() {
+        window.location.href = 'patient_detail.html';
+    }
+
+
+    // --- 1st Requirement: Doctor List & Patient Validation for Appointments ---
+
+    // Function to fetch doctors from backend and populate dropdown
+    async function fetchDoctors() {
+        const doctorSelect = document.getElementById('doctor');
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            showAlert('apptAlert', 'Authentication token missing. Please log in.', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/users/doctors`, { // Assuming this endpoint for doctors
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to fetch doctors.');
+            }
+
+            const doctors = await response.json();
+            doctorSelect.innerHTML = '<option value="">Select Doctor</option>'; // Clear existing and add default
+
+            doctors.forEach(doctor => {
+                const option = document.createElement('option');
+                option.value = doctor._id; // Use doctor's MongoDB ID as value
+                option.textContent = doctor.name; // Display doctor's name
+                doctorSelect.appendChild(option);
+            });
+            // Update doctor availability list (dummy for now, will integrate with backend)
+            updateDoctorAvailability(doctors);
+
+        } catch (error) {
+            console.error('Error fetching doctors:', error);
+            showAlert('apptAlert', `Error loading doctors: ${error.message}`, 'error');
+        }
+    }
+
+    // Helper to update doctor availability list (placeholder for backend data)
+    function updateDoctorAvailability(doctors = []) {
+        const list = document.getElementById('doctorAvailabilityList');
+        list.innerHTML = ''; // Clear previous entries
+
+        if (doctors.length === 0) {
+            list.innerHTML = '<li>No doctors found or loaded.</li>';
+            return;
+        }
+
+        doctors.forEach(doctor => {
+            // For now, assign random dummy statuses. In a real app, this comes from backend.
+            const statuses = ['Available', 'On Break', 'Not Available'];
+            const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+            const statusClass = `status-${randomStatus.toLowerCase().replace(' ', '-')}`;
+
+            const listItem = document.createElement('li');
+            listItem.innerHTML = `${doctor.name}: <span class="${statusClass}">${randomStatus}</span>`;
+            list.appendChild(listItem);
+        });
+    }
+
+    // Function to validate patient existence by name, email, or phone number
+    async function findPatient(queryType, queryValue) {
+        if (!queryValue) return null; // No query, no patient found
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('Authentication token missing. Please log in.');
+            window.location.href = 'login.html';
+            return null;
+        }
+
+        let queryParam;
+        if (queryType === 'name') {
+            queryParam = `name=${encodeURIComponent(queryValue)}`;
+        } else if (queryType === 'phoneNumber') {
+            queryParam = `mobileNumber=${encodeURIComponent(queryValue)}`; // Matches backend param name
+        } else if (queryType === 'emailAddress') {
+            queryParam = `emailAddress=${encodeURIComponent(queryValue)}`;
+        } else {
+            console.error('Invalid query type for patient search:', queryType);
+            return null;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/patients/search?${queryParam}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to search for patient.');
+            }
+
+            const patients = await response.json();
+            return patients.length > 0 ? patients[0] : null; // Return the first matching patient
+        } catch (error) {
+            console.error(`Error finding patient by ${queryType}:`, error);
+            return null;
+        }
+    }
+
+    // Appointment Form Submission
+    document.getElementById('apptForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const patientName = document.getElementById('patientNameAppt').value.trim();
+      const doctorId = document.getElementById('doctor').value; // This is doctor's _id
+      const datetime = document.getElementById('datetime').value;
+      const apptAlertDiv = document.getElementById('apptAlert');
+
+      apptAlertDiv.style.display = 'none'; // Hide previous alerts
+
+      if (!patientName || !doctorId || !datetime) {
+          showAlert('apptAlert', 'Please fill all appointment fields.', 'error');
+          return;
+      }
+
+      // Validate patient existence
+      const patient = await findPatient('name', patientName);
+      if (!patient) {
+          showAlert('apptAlert', 'Patient not found. Please register the patient first.', 'error');
+          return;
+      }
+
+      // If patient exists, proceed with booking (demo for now)
+      showAlert('apptAlert', `Appointment for ${patient.fullName} with ${document.getElementById('doctor').options[document.getElementById('doctor').selectedIndex].text} booked for ${new Date(datetime).toLocaleString()}. (Demo)`, 'success');
+      this.reset();
+    });
+
+
+    // --- 2nd Requirement: Patient Validation for Send Reminder & Billing ---
+
+    // Send Reminder Form Submission
+    document.getElementById('reminderForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const contact = document.getElementById('contactReminder').value.trim();
+        const type = document.getElementById('type').value; // 'email' or 'sms'
+        const reminderAlertDiv = document.getElementById('reminderAlert');
+
+        reminderAlertDiv.style.display = 'none';
+
+        if (!contact) {
+            showAlert('reminderAlert', 'Please provide a contact (Email or Phone Number).', 'error');
+            return;
+        }
+
+        let patient = null;
+        if (type === 'email') {
+            patient = await findPatient('emailAddress', contact);
+        } else if (type === 'sms') {
+            patient = await findPatient('phoneNumber', contact);
+        }
+
+        if (!patient) {
+            showAlert('reminderAlert', 'Patient not found with the provided contact information.', 'error');
+            return;
+        }
+
+        // If patient exists, proceed with reminder (demo for now)
+        showAlert('reminderAlert', `Reminder sent to ${patient.fullName} via ${type}. (Demo)`, 'success');
+        this.reset();
+    });
+
+    // Billing Form Submission
+    document.getElementById('billingForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const patientName = document.getElementById('billPatientName').value.trim();
+        const insurance = document.getElementById('insurance').value.trim();
+        const billingAmount = document.getElementById('billingAmount').value;
+        const billingAlertDiv = document.getElementById('billingAlert');
+
+        billingAlertDiv.style.display = 'none';
+
+        if (!patientName || !billingAmount) {
+            showAlert('billingAlert', 'Please provide Patient Name and Amount.', 'error');
+            return;
+        }
+
+        // Validate patient existence by name
+        const patient = await findPatient('name', patientName);
+        if (!patient) {
+            showAlert('billingAlert', 'Patient not found. Please verify the patient name.', 'error');
+            return;
+        }
+
+        // If patient exists, proceed with billing update (demo for now)
+        showAlert('billingAlert', `Billing for ${patient.fullName} updated with amount $${billingAmount}. (Demo)`, 'success');
+        this.reset();
+    });
+
+    // Print Form Submission (no patient validation, but could be added similar to others)
+    document.getElementById('printForm').addEventListener('submit', async function(e){
+      e.preventDefault();
+      const printPatientName = document.getElementById('printPatient').value.trim();
+      const printAlertDiv = document.getElementById('printAlert');
+      printAlertDiv.style.display = 'none';
+
+      if (!printPatientName) {
+          showAlert('printAlert', 'Please provide a patient name to print slip.', 'error');
+          return;
+      }
+
+      const patient = await findPatient('name', printPatientName);
+      if (!patient) {
+          showAlert('printAlert', 'Patient not found. Cannot print slip.', 'error');
+          return;
+      }
+
+      showAlert('printAlert', `Printing slip for ${patient.fullName}... (Demo)`, 'success');
+      this.reset();
+    });
+
+  </script>
+</body>
+</html>

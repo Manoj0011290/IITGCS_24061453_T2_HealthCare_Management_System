@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Admin Dashboard - Hospital System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Full CSS content */
+        :root {
+            --primary: #4f8cff;
+            --accent: linear-gradient(90deg, #4f8cff 0%, #8f6fff 100%);
+            --sidebar-bg: rgba(31, 41, 55, 0.97);
+            --glass-bg: rgba(255,255,255,0.25);
+            --glass-border: rgba(255,255,255,0.18);
+            --card-bg: rgba(255,255,255,0.85);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.13);
+            --radius: 18px;
+            --transition: 0.3s cubic-bezier(.4,0,.2,1);
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background: linear-gradient(120deg, #e0e7ff 0%, #f8fafc 100%);
+            min-height: 100vh;
+        }
+        body {
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            color: #222;
+            letter-spacing: 0.01em;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        .dashboard {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+        .sidebar {
+            background: var(--sidebar-bg);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid var(--glass-border);
+            width: 260px;
+            min-width: 180px;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            box-shadow: 2px 0 18px rgba(31,41,55,0.08);
+            z-index: 2;
+            transition: background var(--transition);
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #b3c6ff #2c3e50;
+        }
+        .sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #b3c6ff;
+            border-radius: 6px;
+        }
+        .sidebar-header {
+            width: 100%;
+            padding: 32px 18px 16px 18px;
+            box-sizing: border-box;
+        }
+        .sidebar h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            background: var(--accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 1px;
+            user-select: none;
+            margin: 0;
+        }
+        .sidebar nav {
+            width: 100%;
+            flex: 1;
+            padding-bottom: 24px;
+        }
+        .sidebar nav ul {
+            list-style: none;
+            padding: 0 0 0 0;
+            margin: 0;
+            width: 100%;
+        }
+        .sidebar nav ul li {
+            margin-bottom: 14px;
+        }
+        .sidebar nav ul li:last-child {
+            margin-bottom: 0;
+        }
+        .sidebar nav ul li button {
+            width: 100%;
+            background: none;
+            border: none;
+            color: #e0e7ff;
+            font-size: 1.13rem;
+            font-weight: 600;
+            padding: 13px 18px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            transition: background var(--transition), color var(--transition), box-shadow var(--transition);
+            position: relative;
+            overflow: hidden;
+            text-align: left;
+            display: flex; /* Added for icon alignment */
+            align-items: center; /* Added for icon alignment */
+            gap: 10px; /* Space between icon and text */
+        }
+        .sidebar nav ul li button.active,
+        .sidebar nav ul li button:hover {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 3px 16px 0 rgba(79,140,255,0.10);
+            transform: translateY(-2px) scale(1.04);
+        }
+        .main-content {
+            flex: 1;
+            padding: 36px 36px 24px 36px;
+            background: transparent;
+            position: relative;
+            overflow-y: auto;
+            height: 100vh;
+            scrollbar-width: thin;
+            scrollbar-color: #b3c6ff #e0e7ff;
+        }
+        .main-content::-webkit-scrollbar {
+            width: 10px;
+        }
+        .main-content::-webkit-scrollbar-thumb {
+            background: #b3c6ff;
+            border-radius: 8px;
+        }
+        .main-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .section {
+            display: none;
+            animation: fadeInUp 0.7s;
+        }
+        .section.active {
+            display: block;
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 36px 32px 28px 32px;
+            max-width: 700px;
+            width: 100%;
+            margin: 0 auto 24px auto;
+            animation: fadeInUp 0.7s;
+        }
+        .card h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 18px;
+            color: #4f8cff;
+            letter-spacing: 1px;
+        }
+        label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: block;
+            color: #333;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 14px;
+            border: 1.5px solid #b3c6ff;
+            border-radius: 7px;
+            font-size: 1rem;
+            background: rgba(255,255,255,0.85);
+            transition: border-color 0.3s;
+            resize: vertical;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #4f8cff;
+            outline: none;
+        }
+        button, .action-btn {
+            background: linear-gradient(90deg, #4f8cff 0%, #8f6fff 100%);
+            color: #fff;
+            border: none;
+            padding: 12px 28px;
+            font-size: 1.08rem;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s, box-shadow 0.3s, transform 0.3s;
+            margin-right: 10px;
+            margin-top: 2px;
+        }
+        button:hover, .action-btn:hover {
+            background: linear-gradient(90deg, #8f6fff 0%, #4f8cff 100%);
+            box-shadow: 0 6px 18px 0 rgba(79,140,255,0.18);
+            transform: translateY(-2px) scale(1.04);
+        }
+        .actions {
+            display: flex; justify-content: flex-start; gap: 10px;
+        }
+        ul { list-style: none; padding: 0; margin: 16px 0 0 0;}
+        ul li { margin-bottom: 7px; color: #333;}
+        .note { font-size: 0.98rem; color: #888; margin-top: 18px;}
+        .stat {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #4f8cff;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+        }
+        .table th, .table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #e0e7ff;
+            text-align: left;
+            font-size: 1.05rem;
+        }
+        .table th {
+            background: #f3f8ff;
+            color: #4f8cff;
+            font-weight: 700;
+        }
+        .table tr:last-child td {
+            border-bottom: none;
+        }
+        .audit-log-item { /* Renamed from .audit-log to avoid conflict if any */
+            background: #f3f8ff;
+            border-radius: 7px;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 1.06rem;
+            border-left: 4px solid #4f8cff;
+        }
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 30px;
+            margin-bottom: 18px;
+        }
+        .analytics-card {
+            background: #f3f8ff;
+            border-radius: 11px;
+            box-shadow: 0 2px 12px 0 rgba(79,140,255,0.08);
+            padding: 18px 20px;
+            color: #333;
+            text-align: center;
+            border: 1.5px solid #e0e7ff;
+        }
+        .analytics-card .stat {
+            font-size: 2rem;
+            color: #4f8cff;
+            margin-bottom: 4px;
+        }
+        .analytics-card .stat-label {
+            font-size: 1.07rem;
+            color: #666;
+            font-weight: 600;
+        }
+        .export-btn {
+            background: linear-gradient(90deg, #8f6fff 0%, #4f8cff 100%);
+            color: #fff;
+            border: none;
+            padding: 12px 18px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 14px;
+            margin-right: 10px;
+            transition: background 0.3s, box-shadow 0.3s, transform 0.3s;
+        }
+        .export-btn:hover {
+            background: linear-gradient(90deg, #4f8cff 0%, #8f6fff 100%);
+            box-shadow: 0 6px 18px 0 rgba(79,140,255,0.18);
+            transform: translateY(-2px) scale(1.04);
+        }
+        /* Alert styles */
+        .alert {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            font-weight: 600;
+            display: none; /* Hidden by default */
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .user-list-item, .dept-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .user-list-item:last-child, .dept-list-item:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                padding: 14px 2vw 14px 2vw;
+            }
+            .card {
+                max-width: 99vw;
+            }
+        }
+        @media (max-width: 700px) {
+            .main-content {
+                padding: 8px 2vw 8px 2vw;
+            }
+            .dashboard {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100vw;
+                min-width: 0;
+                flex-direction: row;
+                align-items: center;
+                justify-content: flex-start;
+                padding: 0;
+                box-shadow: none;
+                height: 70px;
+                position: fixed;
+                top: 0; left: 0; right: 0;
+                z-index: 10;
+            }
+            .sidebar-header {
+                padding: 12px 12px 12px 18px;
+            }
+            .sidebar nav ul {
+                display: flex;
+                flex-direction: row;
+                gap: 0;
+                width: 100vw;
+                overflow-x: auto;
+                padding: 0 0 0 0;
+                justify-content: flex-start; /* Ensure buttons start from left */
+            }
+            .sidebar nav ul li {
+                margin: 0;
+                flex-shrink: 0; /* Prevent items from shrinking */
+            }
+            .sidebar nav ul li button {
+                font-size: 0.98rem;
+                padding: 10px 10px;
+                min-width: 150px;
+            }
+            .main-content {
+                margin-top: 80px;
+            }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Admin</h2>
+            </div>
+            <nav>
+                <ul>
+                    <li><button class="active" data-section="0"><i class="fas fa-users-cog"></i> User Management</button></li>
+                    <li><button data-section="1"><i class="fas fa-user-tag"></i> Role & Permissions</button></li>
+                    <li><button data-section="2"><i class="fas fa-cogs"></i> System Settings</button></li>
+                    <li><button data-section="3"><i class="fas fa-hospital"></i> Departments & Specializations</button></li>
+                    <li><button data-section="4"><i class="fas fa-clipboard-list"></i> Audit Logs</button></li>
+                    <li><button data-section="5"><i class="fas fa-chart-bar"></i> Analytics Dashboard</button></li>
+                    <li><button data-section="6"><i class="fas fa-file-export"></i> Reports Export</button></li>
+                    <li><button data-section="7"><i class="fas fa-notes-medical"></i> All Appointments & Records</button></li>
+                    <li><button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button></li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="main-content">
+            <!-- 1. User Management -->
+            <section class="section active">
+                <div class="card">
+                    <h2>User Management</h2>
+                    <div id="userManagementAlert" class="alert"></div>
+                    <form id="userForm">
+                        <label for="userName">Full Name</label>
+                        <input type="text" id="userName" required>
+                        <label for="userEmail">Email</label>
+                        <input type="email" id="userEmail" required>
+                        <label for="userPassword">Password</label>
+                        <input type="password" id="userPassword" required minlength="6">
+                        <label for="userRole">Role</label>
+                        <select id="userRole" required>
+                            <option value="">Select</option>
+                            <option value="doctor">Doctor</option>
+                            <option value="nurse">Nurse</option>
+                            <option value="receptionist">Receptionist</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                        <label for="userEmployeeId">Employee ID</label>
+                        <input type="text" id="userEmployeeId" required>
+                        <label for="userRoleKey">Role Key</label>
+                        <input type="text" id="userRoleKey" required>
+                        <button type="submit">Create User</button>
+                    </form>
+                    <h3>Existing Users</h3>
+                    <div id="userList">
+                        <p>Loading users...</p>
+                    </div>
+                </div>
+            </section>
+            <!-- 2. Role Assignment and Permissions -->
+            <section class="section">
+                <div class="card">
+                    <h2>Role Assignment & Permissions</h2>
+                    <div id="roleAssignmentAlert" class="alert"></div>
+                    <form id="roleForm">
+                        <label for="roleUserEmail">User Email</label>
+                        <input type="email" id="roleUserEmail" required>
+                        <label for="roleAssignSelect">Assign Role</label>
+                        <select id="roleAssignSelect" required>
+                            <option value="">Select</option>
+                            <option value="doctor">Doctor</option>
+                            <option value="nurse">Nurse</option>
+                            <option value="receptionist">Receptionist</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                        <button type="submit">Assign Role</button>
+                    </form>
+                    <div class="note">Permissions are updated instantly.</div>
+                </div>
+            </section>
+            <!-- 3. System Settings -->
+            <section class="section">
+                <div class="card">
+                    <h2>System Settings</h2>
+                    <div id="systemSettingsAlert" class="alert"></div>
+                    <form id="settingsForm">
+                        <label for="sysEmail">System Email</label>
+                        <input type="email" id="sysEmail" value="admin@hospital.com">
+                        <label for="sysNotif">Notifications</label>
+                        <select id="sysNotif">
+                            <option>Enabled</option>
+                            <option>Disabled</option>
+                        </select>
+                        <label for="sysTheme">Theme</label>
+                        <select id="sysTheme">
+                            <option>Default</option>
+                            <option>Dark</option>
+                            <option>Light</option>
+                        </select>
+                        <button type="submit">Save Settings</button>
+                    </form>
+                </div>
+            </section>
+            <!-- 4. Manage Departments and Specializations -->
+            <section class="section">
+                <div class="card">
+                    <h2>Departments & Specializations</h2>
+                    <div id="deptAlert" class="alert"></div>
+                    <form id="deptForm">
+                        <label for="deptName">Department Name</label>
+                        <input type="text" id="deptName" required>
+                        <label for="specialization">Specialization</label>
+                        <input type="text" id="specialization" required>
+                        <button type="submit">Add Department</button>
+                    </form>
+                    <h3>Existing Departments</h3>
+                    <div id="deptList">
+                        <p>Loading departments...</p>
+                    </div>
+                </div>
+            </section>
+            <!-- 5. Audit Logs and System Activity Tracking -->
+            <section class="section">
+                <div class="card">
+                    <h2>Audit Logs & System Activity</h2>
+                    <div id="auditLogAlert" class="alert"></div>
+                    <div id="auditLogsList">
+                        <p>Loading audit logs...</p>
+                    </div>
+                </div>
+            </section>
+            <!-- 6. Analytics Dashboard -->
+            <section class="section">
+                <div class="card">
+                    <h2>Analytics Dashboard</h2>
+                    <div id="analyticsAlert" class="alert"></div>
+                    <div class="analytics-grid">
+                        <div class="analytics-card">
+                            <div class="stat" id="totalUsersStat">0</div>
+                            <div class="stat-label">Total Users</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="stat" id="totalPatientsStat">0</div>
+                            <div class="stat-label">Total Patients</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="stat" id="totalAppointmentsStat">0</div>
+                            <div class="stat-label">Total Appointments</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="stat" id="totalDepartmentsStat">0</div>
+                            <div class="stat-label">Total Departments</div>
+                        </div>
+                    </div>
+                    <div class="note">Analytics are updated in real-time.</div>
+                </div>
+            </section>
+            <!-- 7. Reports Export -->
+            <section class="section">
+                <div class="card">
+                    <h2>Reports Export</h2>
+                    <div id="reportsExportAlert" class="alert"></div>
+                    <button class="export-btn" id="exportPdfBtn">Export as PDF</button>
+                    <button class="export-btn" id="exportExcelBtn">Export as Excel</button>
+                    <div class="note">Export audit logs, analytics, and user activity for compliance and review.</div>
+                </div>
+            </section>
+            <!-- 8. View all appointments and medical records -->
+            <section class="section">
+                <div class="card">
+                    <h2>All Appointments & Medical Records</h2>
+                    <div id="appointmentsRecordsAlert" class="alert"></div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Patient</th>
+                                <th>Doctor</th>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointmentsRecordsTableBody">
+                            <tr><td colspan="5">Loading data...</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="note">This section provides an overview. Full details require specific patient/doctor views.</div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script>
+    // Base URL for your backend API (ensure this matches your backend's port)
+    const API_BASE_URL = 'http://localhost:3001/api';
+
+    // --- Helper for showing section alerts ---
+    function showAlert(alertDivId, message, type) {
+        const alertDiv = document.getElementById(alertDivId);
+        if (!alertDiv) {
+            console.error(`Alert div with ID "${alertDivId}" not found.`);
+            return;
+        }
+        alertDiv.textContent = message;
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.style.display = 'block';
+        setTimeout(() => { alertDiv.style.display = 'none'; }, 5000);
+    }
+
+    // --- Custom Modal/Message Box for Alerts (replacing native alert/confirm) ---
+    // You need to add the HTML for a custom modal (e.g., a div with id="customModal")
+    // and its CSS to your page for this function to work visually.
+    // For now, it uses the browser's confirm/alert as a fallback, but the instruction
+    // is to replace these with a custom modal UI.
+    function displayCustomAlert(id, message, type = 'info', confirmCallback = null, cancelCallback = null) {
+        let alertDiv = document.getElementById(id);
+        if (!alertDiv) {
+            alertDiv = document.createElement('div');
+            alertDiv.id = id;
+            alertDiv.className = 'alert';
+            // It's better to append to a specific container like main-content or body
+            document.body.appendChild(alertDiv);
+        }
+        alertDiv.textContent = message;
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.style.display = 'block';
+
+        if (confirmCallback) {
+            // This is a placeholder for a custom confirmation modal.
+            // For now, it uses the browser's confirm.
+            if (confirm(message)) {
+                confirmCallback();
+            } else if (cancelCallback) {
+                cancelCallback();
+            }
+        } else {
+            setTimeout(() => { alertDiv.style.display = 'none'; }, 5000);
+        }
+    }
+
+    // Initial authentication check - runs when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        const token = localStorage.getItem('token');
+        const userRole = localStorage.getItem('userRole');
+
+        // Check if token exists and if the user role is 'admin'
+        if (!token || userRole !== 'admin') {
+            displayCustomAlert('authAlert', 'Access Denied: Please log in as an admin.', 'error');
+            window.location.href = 'login.html'; // Redirect to login if not authorized
+        } else {
+            // If authenticated, display the first section (User Management)
+            showSection(0);
+            fetchInitialData(); // Fetch data after auth check
+        }
+    });
+
+    // --- Dynamic Section Switching ---
+    function showSection(sectionIdx) {
+        document.querySelectorAll('.sidebar nav ul li button').forEach((btn, i) => {
+            btn.classList.toggle('active', i === sectionIdx);
+        });
+        document.querySelectorAll('.main-content .section').forEach((sec, i) => {
+            sec.classList.toggle('active', i === sectionIdx);
+        });
+        // Trigger data fetch for the active section if needed
+        // These will now call the functions that fetch from MongoDB
+        if (sectionIdx === 0) renderUserList(); // Refresh user list on User Management view
+        if (sectionIdx === 3) renderDeptList(); // Refresh department list on Departments view
+        if (sectionIdx === 4) renderAuditLogs(); // Refresh audit logs
+        if (sectionIdx === 5) fetchAnalytics(); // Refresh analytics on Dashboard view
+        if (sectionIdx === 7) renderAppointmentsAndRecords(); // Refresh appointments
+    }
+
+    // Attach event listeners to navigation buttons
+    document.querySelectorAll('.sidebar nav ul li button[data-section]').forEach(button => {
+        button.addEventListener('click', () => {
+            showSection(parseInt(button.dataset.section));
+        });
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+        localStorage.removeItem('token'); // Clear the stored JWT token
+        localStorage.removeItem('userRole'); // Clear the stored user role
+        displayCustomAlert('logoutAlert', 'You have been logged out.', 'info');
+        window.location.href = 'login.html'; // Redirect to the login page
+    });
+
+    // --- Initial Data Fetch (after DOM is loaded and Auth is checked) ---
+    function fetchInitialData() {
+        // These functions are now called when the dashboard loads and when switching sections
+        renderUserList();
+        renderDeptList();
+        fetchAnalytics();
+        renderAuditLogs();
+        renderAppointmentsAndRecords();
+    }
+
+    // --- Helper function to get auth token for API calls ---
+    function getAuthHeaders() {
+        const token = localStorage.getItem('token');
+        return {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        };
+    }
+
+    // --- Audit Logging Function (sends to backend) ---
+    async function logAdminAction(action, details = {}) {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.warn("No token available for audit logging. User might not be fully authenticated yet.");
+            return;
+        }
+        try {
+            const response = await fetch(`${API_BASE_URL}/auditlogs`, { // Assuming an /api/auditlogs endpoint
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ action, details })
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error("Failed to log audit action:", errorData.message);
+            } else {
+                console.log("Audit log added:", action);
+            }
+        } catch (error) {
+            console.error("Error sending audit log to backend:", error);
+        }
+    }
+
+    // --- 1. User Management ---
+    const userForm = document.getElementById('userForm');
+    const userListDiv = document.getElementById('userList');
+    const userManagementAlert = document.getElementById('userManagementAlert');
+
+    if (userForm) {
+        userForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const name = document.getElementById('userName').value.trim();
+            const email = document.getElementById('userEmail').value.trim();
+            const password = document.getElementById('userPassword').value;
+            const role = document.getElementById('userRole').value;
+            const employeeId = document.getElementById('userEmployeeId').value.trim();
+            const roleKey = document.getElementById('userRoleKey').value.trim();
+
+            showAlert('userManagementAlert', '', 'success'); // Clear previous alerts
+            showAlert('userManagementAlert', '', 'error');   // Clear previous alerts
+
+            if (!name || !email || !password || !role || !employeeId || !roleKey) {
+                showAlert('userManagementAlert', 'Please fill all fields.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/users/signup`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, email, password, role, employeeId, roleKey })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAlert('userManagementAlert', data.message || 'User created successfully!', 'success');
+                    logAdminAction('User Created', { email: email, role: role, employeeId: employeeId });
+                    userForm.reset();
+                    renderUserList(); // Refresh list after creation
+                } else {
+                    showAlert('userManagementAlert', data.message || 'Failed to create user.', 'error');
+                }
+            } catch (error) {
+                console.error('Error creating user:', error);
+                showAlert('userManagementAlert', `Network error or server issue: ${error.message}`, 'error');
+            }
+        });
+    }
+
+    async function renderUserList() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/users`, {
+                method: 'GET',
+                headers: getAuthHeaders()
+            });
+            const result = await response.json(); // Renamed 'data' to 'result' to avoid confusion
+
+            userListDiv.innerHTML = '';
+            // Access the 'data' array inside the 'result' object
+            if (response.ok && result.data && result.data.length > 0) { 
+                const ul = document.createElement('ul');
+                result.data.forEach(user => { // Iterate over result.data
+                    const li = document.createElement('li');
+                    li.className = 'user-list-item';
+                    li.innerHTML = `
+                        <span><strong>${user.role}:</strong> ${user.name} (${user.email}) - ID: ${user.employeeId || 'N/A'}</span>
+                        <button class="action-btn" style="background:#ff4f6f;" onclick="showConfirmDeleteUserModal('${user._id}', '${user.email}')">Delete</button>
+                    `;
+                    ul.appendChild(li);
+                });
+                userListDiv.appendChild(ul);
+            } else if (response.ok && result.data && result.data.length === 0) { // Check result.data explicitly
+                userListDiv.innerHTML = '<p>No users found.</p>';
+            } else {
+                // IMPORTANT: If result.data is undefined, it means the API returned an object without 'data' property.
+                // In this case, 'result' itself might be the error message or an empty object.
+                showAlert('userManagementAlert', result.message || 'Error loading users: Unexpected response format.', 'error');
+                userListDiv.innerHTML = '<p>Error loading users.</p>';
+            }
+        } catch (error) {
+            console.error("Error fetching users:", error);
+            showAlert('userManagementAlert', `Network error or server issue: ${error.message}`, 'error');
+            userListDiv.innerHTML = '<p>Error loading users.</p>';
+        }
+    }
+
+    // Function to show custom confirm modal for user deletion
+    function showConfirmDeleteUserModal(userIdToDelete, userEmail) {
+        displayCustomAlert(
+            'userManagementConfirmAlert',
+            `Are you sure you want to delete user ${userEmail}? This action cannot be undone.`,
+            'info',
+            () => deleteUser(userIdToDelete, userEmail)
+        );
+    }
+
+    async function deleteUser(userIdToDelete, userEmail) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/users/${userIdToDelete}`, {
+                method: 'DELETE',
+                headers: getAuthHeaders()
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+                showAlert('userManagementAlert', data.message || `User ${userEmail} deleted successfully!`, 'success');
+                logAdminAction('User Deleted', { email: userEmail, deletedUserId: userIdToDelete });
+                renderUserList(); // Refresh list after deletion
+            } else {
+                showAlert('userManagementAlert', data.message || `Failed to delete user ${userEmail}.`, 'error');
+            }
+        } catch (error) {
+            console.error("Error deleting user:", error);
+            showAlert('userManagementAlert', `Network error or server issue: ${error.message}`, 'error');
+        }
+    }
+
+    // --- 2. Role Assignment and Permissions ---
+    const roleForm = document.getElementById('roleForm');
+    const roleAssignmentAlert = document.getElementById('roleAssignmentAlert');
+
+    if (roleForm) {
+        roleForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const userEmailToUpdate = document.getElementById('roleUserEmail').value.trim();
+            const newRole = document.getElementById('roleAssignSelect').value;
+
+            showAlert('roleAssignmentAlert', '', 'success'); // Clear previous alerts
+            showAlert('roleAssignmentAlert', '', 'error');   // Clear previous alerts
+
+            if (!userEmailToUpdate || !newRole) {
+                showAlert('roleAssignmentAlert', 'Please enter user email and select a new role.', 'error');
+                return;
+            }
+
+            try {
+                // First, find the user by email to get their ID
+                // NOTE: This /users/search endpoint might not exist in your backend's userRoutes.js
+                // You might need to add a dedicated search endpoint for users by email.
+                // Alternatively, fetch all users and filter client-side if the list is small.
+                const searchResponse = await fetch(`${API_BASE_URL}/users/search?emailAddress=${encodeURIComponent(userEmailToUpdate)}`, {
+                    method: 'GET',
+                    headers: getAuthHeaders()
+                });
+                const searchData = await searchResponse.json();
+
+                // Assuming searchData.data holds the array if backend wraps it
+                let foundUsers = searchData.data || searchData; 
+
+                if (!searchResponse.ok || foundUsers.length === 0) {
+                    showAlert('roleAssignmentAlert', searchData.message || 'User not found with that email.', 'error');
+                    return;
+                }
+
+                const userIdToUpdate = foundUsers[0]._id; // Assuming search returns an array and we take the first match
+
+                // Then, update the user's role
+                const updateResponse = await fetch(`${API_BASE_URL}/users/${userIdToUpdate}`, { // Assuming PUT /api/users/:id route for updates
+                    method: 'PUT',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ role: newRole }) // Send only the role to be updated
+                });
+
+                const updateData = await updateResponse.json();
+
+                if (updateResponse.ok) {
+                    showAlert('roleAssignmentAlert', updateData.message || `Role for ${userEmailToUpdate} updated to ${newRole}!`, 'success');
+                    logAdminAction('User Role Updated', { email: userEmailToUpdate, newRole: newRole, userId: userIdToUpdate });
+                    roleForm.reset();
+                    renderUserList(); // Refresh user list to show updated role
+                } else {
+                    showAlert('roleAssignmentAlert', updateData.message || `Failed to assign role to ${userEmailToUpdate}.`, 'error');
+                }
+            } catch (error) {
+                console.error("Error assigning role:", error);
+                showAlert('roleAssignmentAlert', `Network error or server issue: ${error.message}`, 'error');
+            }
+        });
+    }
+
+    // --- 3. System Settings (Demo - No Backend Integration for now) ---
+    const settingsForm = document.getElementById('settingsForm');
+    const systemSettingsAlert = document.getElementById('systemSettingsAlert');
+    if (settingsForm) {
+        settingsForm.addEventListener('submit', function(e){
+            e.preventDefault();
+            showAlert('systemSettingsAlert', 'System settings saved (demo)!', 'success');
+            logAdminAction('System Settings Saved', { email: this.sysEmail.value, notifications: this.sysNotif.value, theme: this.sysTheme.value });
+        });
+    }
+
+    // --- 4. Manage Departments and Specializations ---
+    const deptForm = document.getElementById('deptForm');
+    const deptListDiv = document.getElementById('deptList'); // Changed from deptList to deptListDiv for consistency
+    const deptAlert = document.getElementById('deptAlert');
+
+    if (deptForm) {
+        deptForm.addEventListener('submit', async function(e){
+            e.preventDefault();
+            const deptName = document.getElementById('deptName').value.trim();
+            const specialization = document.getElementById('specialization').value.trim();
+
+            showAlert('deptAlert', '', 'success'); // Clear previous alerts
+            showAlert('deptAlert', '', 'error');   // Clear previous alerts
+
+            if (!deptName || !specialization) {
+                showAlert('deptAlert', 'Please fill all department fields.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/departments`, { // Assuming /api/departments endpoint
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ name: deptName, specialization: specialization })
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAlert('deptAlert', data.message || 'Department added successfully!', 'success');
+                    logAdminAction('Department Added', { name: deptName, specialization: specialization });
+                    deptForm.reset();
+                    renderDeptList(); // Refresh list after creation
+                } else {
+                    showAlert('deptAlert', data.message || `Failed to add department: ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                console.error("Error adding department:", error);
+                showAlert('deptAlert', `Network error or server issue: ${error.message}`, 'error');
+            }
+        });
+    }
+
+    async function renderDeptList() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/departments`, { // Assuming /api/departments endpoint for GET
+                method: 'GET',
+                headers: getAuthHeaders()
+            });
+            const data = await response.json();
+
+            deptListDiv.innerHTML = '';
+            // Assuming the backend for /departments returns an array directly, not wrapped in 'data'
+            if (response.ok && data.length > 0) { 
+                const ul = document.createElement('ul');
+                data.forEach(dept => {
+                    const li = document.createElement('li');
+                    li.className = 'dept-list-item';
+                    li.innerHTML = `
+                        <span><strong>${dept.name}:</strong> ${dept.specialization}</span>
+                        <button class="action-btn" style="background:#ff4f6f;" onclick="showConfirmDeleteDeptModal('${dept._id}', '${dept.name}')">Delete</button>
+                    `;
+                    ul.appendChild(li);
+                });
+                deptListDiv.appendChild(ul);
+            } else if (response.ok && data.length === 0) {
+                deptListDiv.innerHTML = '<p>No departments found.</p>';
+            } else {
+                showAlert('deptAlert', data.message || 'Error loading departments.', 'error');
+                deptListDiv.innerHTML = '<p>Error loading departments.</p>';
+            }
+        } catch (error) {
+            console.error("Error fetching departments:", error);
+            showAlert('deptAlert', `Network error or server issue: ${error.message}`, 'error');
+            deptListDiv.innerHTML = '<p>Error loading departments.</p>';
+        }
+    }
+
+    // Function to show custom confirm modal for department deletion
+    function showConfirmDeleteDeptModal(deptIdToDelete, deptName) {
+        displayCustomAlert(
+            'deptConfirmAlert',
+            `Are you sure you want to delete department ${deptName}? This action cannot be undone.`,
+            'info',
+            () => deleteDept(deptIdToDelete, deptName)
+        );
+    }
+
+    async function deleteDept(deptIdToDelete, deptName) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/departments/${deptIdToDelete}`, { // Assuming DELETE /api/departments/:id
+                method: 'DELETE',
+                headers: getAuthHeaders()
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+                showAlert('deptAlert', data.message || `Department ${deptName} deleted successfully!`, 'success');
+                logAdminAction('Department Deleted', { name: deptName, deletedDeptId: deptIdToDelete });
+                renderDeptList(); // Refresh list after deletion
+            } else {
+                showAlert('deptAlert', data.message || `Failed to delete department ${deptName}.`, 'error');
+            }
+        } catch (error) {
+            console.error("Error deleting department:", error);
+            showAlert('deptAlert', `Network error or server issue: ${error.message}`, 'error');
+        }
+    }
+
+    // --- 5. Audit Logs and System Activity Tracking ---
+    const auditLogsListDiv = document.getElementById('auditLogsList');
+    const auditLogAlert = document.getElementById('auditLogAlert');
+
+    async function renderAuditLogs() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/auditlogs`, { // Assuming /api/auditlogs endpoint for GET
+                method: 'GET',
+                headers: getAuthHeaders()
+            });
+            const data = await response.json();
+
+            auditLogsListDiv.innerHTML = '';
+            // Assuming the backend for /auditlogs returns an array directly, not wrapped in 'data'
+            if (response.ok && data.length > 0) {
+                // Sort client-side by timestamp (newest first)
+                const sortedLogs = data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                const ul = document.createElement('ul'); // Use ul for list structure
+                sortedLogs.forEach(log => {
+                    const logDate = new Date(log.timestamp).toLocaleString();
+                    const li = document.createElement('li');
+                    li.className = 'audit-log-item';
+                    li.innerHTML = `<strong>${logDate}:</strong> User '${log.userId}' performed '${log.action}'. Details: ${JSON.stringify(log.details)}`;
+                    ul.appendChild(li);
+                });
+                auditLogsListDiv.appendChild(ul);
+            } else if (response.ok && data.length === 0) {
+                auditLogsListDiv.innerHTML = '<p>No audit logs found.</p>';
+            } else {
+                showAlert('auditLogAlert', data.message || 'Error loading audit logs.', 'error');
+                auditLogsListDiv.innerHTML = '<p>Error loading audit logs.</p>';
+            }
+        } catch (error) {
+            console.error("Error fetching audit logs:", error);
+            showAlert('auditLogAlert', `Network error or server issue: ${error.message}`, 'error');
+            auditLogsListDiv.innerHTML = '<p>Error loading audit logs.</p>';
+        }
+    }
+
+    // --- 6. Analytics Dashboard ---
+    const totalUsersStat = document.getElementById('totalUsersStat');
+    const totalPatientsStat = document.getElementById('totalPatientsStat');
+    const totalAppointmentsStat = document.getElementById('totalAppointmentsStat');
+    const totalDepartmentsStat = document.getElementById('totalDepartmentsStat');
+    const analyticsAlert = document.getElementById('analyticsAlert');
+
+    async function fetchAnalytics() {
+        try {
+            // Fetch Total Users
+            const usersResponse = await fetch(`${API_BASE_URL}/users`, { headers: getAuthHeaders() });
+            const usersResult = await usersResponse.json(); // Renamed to usersResult to match backend's return object
+            if (usersResponse.ok && usersResult.data) { // Access usersResult.data
+                totalUsersStat.textContent = usersResult.data.length;
+            } else {
+                console.error("Error fetching total users:", usersResult.message || usersResponse.statusText);
+            }
+
+            // Fetch Total Patients
+            const patientsResponse = await fetch(`${API_BASE_URL}/patients`, { headers: getAuthHeaders() });
+            const patientsData = await patientsResponse.json();
+            if (patientsResponse.ok) {
+                totalPatientsStat.textContent = patientsData.length;
+            } else {
+                console.error("Error fetching total patients:", patientsData.message);
+            }
+
+            // Fetch Total Appointments
+            const appointmentsResponse = await fetch(`${API_BASE_URL}/appointments`, { headers: getAuthHeaders() });
+            const appointmentsData = await appointmentsResponse.json();
+            if (appointmentsResponse.ok) {
+                totalAppointmentsStat.textContent = appointmentsData.length;
+            } else {
+                console.error("Error fetching total appointments:", appointmentsData.message);
+            }
+
+            // Fetch Total Departments
+            const departmentsResponse = await fetch(`${API_BASE_URL}/departments`, { headers: getAuthHeaders() });
+            const departmentsData = await departmentsResponse.json();
+            if (departmentsResponse.ok) {
+                totalDepartmentsStat.textContent = departmentsData.length;
+            } else {
+                console.error("Error fetching total departments:", departmentsData.message);
+            }
+
+        } catch (error) {
+            console.error("Error fetching analytics:", error);
+            showAlert('analyticsAlert', `Network error or server issue: ${error.message}`, 'error');
+        }
+    }
+
+    // --- 7. Reports Export (Demo) ---
+    document.getElementById('exportPdfBtn').addEventListener('click', () => {
+        showAlert('reportsExportAlert', 'Generating PDF report (demo)...', 'info');
+        logAdminAction('Report Exported', { type: 'PDF' });
+    });
+
+    document.getElementById('exportExcelBtn').addEventListener('click', () => {
+        showAlert('reportsExportAlert', 'Generating Excel report (demo)...', 'info');
+        logAdminAction('Report Exported', { type: 'Excel' });
+    });
+
+    // --- 8. All Appointments & Medical Records ---
+    const appointmentsRecordsTableBody = document.getElementById('appointmentsRecordsTableBody');
+    const appointmentsRecordsAlert = document.getElementById('appointmentsRecordsAlert');
+
+    async function renderAppointmentsAndRecords() {
+        try {
+            const appointmentsResponse = await fetch(`${API_BASE_URL}/appointments`, { headers: getAuthHeaders() });
+            const appointments = await appointmentsResponse.json();
+
+            const medicalRecordsResponse = await fetch(`${API_BASE_URL}/medicalrecords`, { headers: getAuthHeaders() }); // Assuming /api/medicalrecords endpoint
+            const medicalRecords = await medicalRecordsResponse.json();
+
+            appointmentsRecordsTableBody.innerHTML = '';
+            const allRecords = [];
+
+            if (appointmentsResponse.ok && appointments.length > 0) {
+                appointments.forEach(appt => {
+                    allRecords.push({
+                        patient: appt.patientName || 'N/A',
+                        doctor: appt.doctorName || 'N/A',
+                        date: new Date(appt.date).toLocaleDateString(), // Assuming date is ISO string
+                        type: appt.type || 'Appointment',
+                        status: appt.status || 'N/A'
+                    });
+                });
+            }
+
+            if (medicalRecordsResponse.ok && medicalRecords.length > 0) {
+                medicalRecords.forEach(record => {
+                    allRecords.push({
+                        patient: record.patientName || 'N/A',
+                        doctor: record.doctorName || 'N/A',
+                        date: new Date(record.createdAt).toLocaleDateString(), // Assuming createdAt is ISO string
+                        type: record.type || 'Medical Record',
+                        status: 'Completed'
+                    });
+                });
+            }
+
+            allRecords.sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort by date, newest first
+
+            if (allRecords.length > 0) {
+                allRecords.forEach(record => {
+                    const row = appointmentsRecordsTableBody.insertRow();
+                    row.innerHTML = `
+                        <td>${record.patient}</td>
+                        <td>${record.doctor}</td>
+                        <td>${record.date}</td>
+                        <td>${record.type}</td>
+                        <td>${record.status}</td>
+                    `;
+                });
+            } else {
+                appointmentsRecordsTableBody.innerHTML = '<tr><td colspan="5">No appointments or medical records found.</td></tr>';
+            }
+        } catch (error) {
+            console.error("Error fetching appointments or medical records:", error);
+            showAlert('appointmentsRecordsAlert', `Network error or server issue: ${error.message}`, 'error');
+            appointmentsRecordsTableBody.innerHTML = '<tr><td colspan="5">Error loading data.</td></tr>';
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Doctor Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* Full CSS content */
+        :root {
+            --primary: #4f8cff;
+            --accent: linear-gradient(90deg, #4f8cff 0%, #8f6fff 100%);
+            --sidebar-bg: rgba(31, 41, 55, 0.96);
+            --glass-bg: rgba(255,255,255,0.25);
+            --glass-border: rgba(255,255,255,0.18);
+            --card-bg: rgba(255,255,255,0.8);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.13);
+            --radius: 18px;
+            --transition: 0.3s cubic-bezier(.4,0,.2,1);
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background: linear-gradient(120deg, #e0e7ff 0%, #f8fafc 100%);
+            min-height: 100vh;
+        }
+        body {
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            color: #222;
+            letter-spacing: 0.01em;
+            overflow: hidden; /* Prevent body scroll, let main-content scroll */
+        }
+        .dashboard {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+        .sidebar {
+            background: var(--sidebar-bg);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid var(--glass-border);
+            width: 250px;
+            min-width: 180px;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            box-shadow: 2px 0 18px rgba(31,41,55,0.08);
+            z-index: 2;
+            transition: background var(--transition);
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #b3c6ff #2c3e50;
+        }
+        .sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #b3c6ff;
+            border-radius: 6px;
+        }
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .sidebar-header {
+            width: 100%;
+            padding: 32px 18px 16px 18px;
+            box-sizing: border-box;
+        }
+        .sidebar h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            background: var(--accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 1px;
+            user-select: none;
+            margin: 0;
+        }
+        .sidebar nav {
+            width: 100%;
+            flex: 1;
+            padding-bottom: 24px;
+        }
+        .sidebar nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+        }
+        .sidebar nav ul li {
+            margin-bottom: 14px;
+        }
+        .sidebar nav ul li:last-child {
+            margin-bottom: 0;
+        }
+        .sidebar nav ul li button {
+            width: 100%;
+            background: none;
+            border: none;
+            color: #e0e7ff;
+            font-size: 1.13rem;
+            font-weight: 600;
+            padding: 13px 18px;
+            border-radius: 8px; /* Changed to 8px for consistency */
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            transition: background var(--transition), color var(--transition), box-shadow var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .sidebar nav ul li button.active,
+        .sidebar nav ul li button:hover {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 3px 16px 0 rgba(79,140,255,0.10);
+            transform: translateY(-2px) scale(1.04);
+        }
+        .main-content {
+            flex: 1;
+            padding: 36px 36px 24px 36px;
+            background: transparent;
+            position: relative;
+            overflow-y: auto; /* Enable scrolling for main content */
+            height: 100vh;
+            scrollbar-width: thin;
+            scrollbar-color: #b3c6ff #e0e7ff;
+        }
+        .main-content::-webkit-scrollbar {
+            width: 10px;
+        }
+        .main-content::-webkit-scrollbar-thumb {
+            background: #b3c6ff;
+            border-radius: 8px;
+        }
+        .main-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .section {
+            display: none;
+            animation: fadeInUp 0.7s;
+        }
+        .section.active {
+            display: block;
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 36px 32px 28px 32px;
+            max-width: 480px;
+            width: 100%;
+            margin: 0 auto 24px auto;
+            animation: fadeInUp 0.7s;
+        }
+        .card h2 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 18px;
+            color: #4f8cff;
+            letter-spacing: 1px;
+        }
+        label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: block;
+            color: #333;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 14px;
+            border: 1.5px solid #b3c6ff;
+            border-radius: 7px;
+            font-size: 1rem;
+            background: rgba(255,255,255,0.85);
+            transition: border-color 0.3s;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #4f8cff;
+            outline: none;
+        }
+        button, .action-btn {
+            background: linear-gradient(90deg, #4f8cff 0%, #8f6fff 100%);
+            color: #fff;
+            border: none;
+            padding: 12px 28px;
+            font-size: 1.08rem;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s, box-shadow 0.3s, transform 0.3s;
+            margin-right: 10px;
+            margin-top: 2px;
+        }
+        button:hover, .action-btn:hover {
+            background: linear-gradient(90deg, #8f6fff 0%, #4f8cff 100%);
+            box-shadow: 0 6px 18px 0 rgba(79,140,255,0.18);
+            transform: translateY(-2px) scale(1.04);
+        }
+        .actions {
+            display: flex;
+            justify-content: flex-start;
+            gap: 10px;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 16px 0 0 0;
+        }
+        ul li {
+            margin-bottom: 7px;
+            color: #333;
+        }
+        .status-available {
+            color: green;
+            font-weight: 700;
+        }
+        .status-break {
+            color: orange;
+            font-weight: 700;
+        }
+        .status-unavailable {
+            color: red;
+            font-weight: 700;
+        }
+        .note {
+            font-size: 0.98rem;
+            color: #888;
+            margin-top: 18px;
+        }
+        .stat {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #4f8cff;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+        /* Alert styles */
+        .alert {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            display: none; /* Hidden by default */
+            font-weight: 600;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .alert-info { /* Added for "no results" message */
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .patient-search-results {
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            background: #f9f9f9;
+        }
+        .patient-search-results div {
+            padding: 8px 12px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+        .patient-search-results div:last-child {
+            border-bottom: none;
+        }
+        .patient-search-results div:hover {
+            background-color: #e6f0ff;
+        }
+        .selected-patient-display {
+            background-color: #e6f0ff;
+            padding: 8px 12px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: block;
+            font-weight: 600;
+            color: #4f8cff;
+        }
+
+        /* Styles for Lab Results List */
+        .result-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 15px;
+        }
+        .result-list li {
+            background-color: #f9f9f9;
+            border: 1px solid #e0e7ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .result-list li strong {
+            color: #4f8cff;
+        }
+
+
+        @media (max-width: 1100px) {
+            .main-content {
+                padding: 18px 4vw 14px 4vw;
+            }
+            .card {
+                max-width: 98vw;
+            }
+        }
+        @media (max-width: 700px) {
+            .main-content {
+                padding: 8px 2vw 8px 2vw;
+            }
+            .dashboard {
+                flex-direction: column; /* Stack sidebar and main content */
+            }
+            .sidebar {
+                width: 100vw;
+                min-width: 0;
+                flex-direction: row;
+                align-items: center;
+                justify-content: flex-start;
+                padding: 0;
+                box-shadow: none;
+                height: 70px; /* Fixed height for top bar */
+                position: fixed; /* Fix sidebar to top */
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 10;
+            }
+            .sidebar-header {
+                padding: 12px 12px 12px 18px;
+            }
+            .sidebar h2 {
+                font-size: 1.5rem; /* Smaller title */
+            }
+            .sidebar nav {
+                flex: none; /* Disable flex growth */
+                width: auto;
+                padding: 0;
+                overflow-x: auto; /* Allow horizontal scrolling for buttons */
+                -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+            }
+            .sidebar nav ul {
+                display: flex;
+                flex-direction: row;
+                gap: 0;
+                padding: 0 10px; /* Add some padding to buttons */
+                min-width: max-content; /* Prevent wrapping */
+            }
+            .sidebar nav ul li {
+                margin: 0 5px; /* Adjust margin between buttons */
+                flex-shrink: 0; /* Prevent buttons from shrinking */
+            }
+            .sidebar nav ul li button {
+                font-size: 0.9rem; /* Smaller font for buttons */
+                padding: 8px 10px;
+                min-width: 100px;
+            }
+            .main-content {
+                margin-top: 80px; /* Push content down below fixed sidebar */
+                height: calc(100vh - 80px); /* Adjust height for scrolling content */
+            }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+
+        /* Styles for the Patient Details Modal (ADD THESE STYLES) */
+        .modal {
+            display: none; /* <--- THIS IS CRUCIAL. ENSURE IT IS 'none' */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            /* The 'display: flex;' below this line is for when it IS shown by JS */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            padding: 30px;
+            border: 1px solid #888;
+            border-radius: var(--radius); /* Re-use your dashboard's border radius */
+            box-shadow: var(--shadow); /* Re-use your dashboard's shadow */
+            width: 80%; /* Responsive width */
+            max-width: 700px; /* Max width to prevent it from getting too wide */
+            position: relative; /* For positioning the close button */
+            animation: fadeIn 0.3s ease-out; /* Simple fade-in animation */
+        }
+
+        .close-button {
+            color: #aaa;
+            position: absolute;
+            top: 15px; /* Adjust as needed */
+            right: 25px; /* Adjust as needed */
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: #333;
+            text-decoration: none;
+        }
+
+        /* Styles for content inside the modal */
+        #modalPatientDetails h3 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-top: 0; /* Remove default top margin */
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        #modalPatientDetails p {
+            margin-bottom: 10px;
+            line-height: 1.6;
+            color: #333;
+            font-size: 1rem;
+        }
+        #modalPatientDetails strong {
+            color: #555;
+            min-width: 150px; /* Align labels */
+            display: inline-block;
+        }
+
+        /* Animation for modal */
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-30px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive adjustments for modal */
+        @media (max-width: 600px) {
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+            .close-button {
+                font-size: 24px;
+                top: 10px;
+                right: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Doctor Panel</h2>
+            </div>
+            <nav>
+                <ul>
+                    <li><button id="dashboardBtn" class="active" data-section="0"><i class="fas fa-chart-line"></i> Dashboard</button></li>
+                    <li><button id="patientRecordsBtn" data-section="1"><i class="fas fa-folder-open"></i> Patient Records</button></li>
+                    <li><button id="prescriptionsBtn" data-section="2"><i class="fas fa-prescription-bottle-alt"></i> Prescriptions & Reports</button></li>
+                    <li><button id="consultationNotesBtn" data-section="3"><i class="fas fa-notes-medical"></i> Consultation Notes</button></li>
+                    <li><button id="followUpsBtn" data-section="4"><i class="fas fa-calendar-check"></i> Follow-ups</button></li>
+                    <li><button id="labResultsBtn" data-section="5"><i class="fas fa-vials"></i> Lab Results</button></li>
+                    <li><button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button></li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="main-content">
+            <section class="section active">
+                <div class="card" style="text-align:center;">
+                    <h2>Welcome, Doctor!</h2>
+                    <p>Use the navigation to manage patient records, add consultation notes, and more.</p>
+                    <div class="stat" id="totalPatientsStat">0</div>
+                    <div class="stat-label">Total Patients</div>
+                    <div class="stat" id="todayAppointmentsStat">0</div>
+                    <div class="stat-label">Appointments Today</div>
+                </div>
+            </section>
+
+            <section class="section">
+                <div class="card">
+                    <h2>Patient Records</h2>
+                    <div id="patientRecordsAlert" class="alert"></div>
+                    <form id="patientRecordsForm">
+                        <label for="searchPatientName">Search Patient (Name/Email/Phone)</label>
+                        <input type="text" id="searchPatientName" required>
+                        <button type="submit">Search</button>
+                    </form>
+                    <div id="patientRecordResults" class="patient-search-results" style="display: none;"></div>
+                    <div id="selectedPatientRecord" class="selected-patient-display" style="display: none;"></div>
+                </div>
+            </section>
+
+            <section class="section">
+                <div class="card">
+                    <h2>Manage Prescriptions & Reports</h2>
+                    <div id="prescriptionAlert" class="alert"></div>
+                    <form id="prescriptionForm">
+                        <label for="prescriptionPatientName">Patient Name</label>
+                        <input type="text" id="prescriptionPatientName" required>
+                        <label for="prescriptionDetails">Prescription/Report Details</label>
+                        <textarea id="prescriptionDetails" rows="5" required></textarea>
+                        <button type="submit">Add Prescription/Report</button>
+                    </form>
+                </div>
+            </section>
+
+            <section class="section">
+                <div class="card">
+                    <h2>Add Consultation Notes</h2>
+                    <div id="consultationNotesAlert" class="alert"></div>
+                    <form id="consultationNotesForm">
+                        <label for="patientNameSearchNotes">Patient Name (Search):</label>
+                        <input type="text" id="patientNameSearchNotes" placeholder="Enter patient name" required>
+                        <button type="button" id="searchPatientBtn">Search Patient</button>
+
+                        <div id="patientSearchResults" class="patient-search-results" style="display: none;"></div>
+
+                        <span id="selectedPatientDisplay" class="selected-patient-display" style="display: none;">Selected Patient: </span>
+                        <input type="hidden" id="selectedPatientIdNotes">
+                        <label for="notes">Notes:</label>
+                        <textarea id="notes" rows="8" required></textarea>
+                        <button type="submit">Save Notes</button>
+                    </form>
+                </div>
+            </section>
+
+            <section class="section">
+                <div class="card">
+                    <h2>Schedule Follow-ups</h2>
+                    <div id="followUpAlert" class="alert"></div>
+                    <form id="followUpForm">
+                        <label for="followUpPatientName">Patient Name</label>
+                        <input type="text" id="followUpPatientName" required>
+                        <label for="followUpDate">Follow-up Date</label>
+                        <input type="date" id="followUpDate" required>
+                        <label for="followUpReason">Reason</label>
+                        <textarea id="followUpReason" rows="3"></textarea>
+                        <button type="submit">Schedule Follow-up</button>
+                    </form>
+                </div>
+            </section>
+
+            <section class="section">
+                <div class="card">
+                    <h2>View Lab Results</h2>
+                    <div id="labResultsAlert" class="alert"></div>
+
+                    <div class="form-group">
+                        <label for="searchLabResultPatientName">Search Patient by Name/ID:</label>
+                        <input type="text" id="searchLabResultPatientName" placeholder="Enter patient name or ID" required>
+                        <button id="searchLabResultsBtn" class="btn">Search</button>
+                    </div>
+
+                    <div id="labResultsDisplayArea" style="display:none;"> <h3>Lab Results for Patient: <span id="currentLabResultsPatientName"></span></h3>
+                        <ul id="labResultsList" class="result-list">
+                            <p id="noLabResultsMessage" style="display:none;">No lab results found for this patient yet.</p>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+     <div id="patientDetailsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Patient Full Details</h2>
+            <div id="modalPatientDetails">
+                Loading patient details...
+            </div>
+        </div>
+      </div>
+
+    <script>
+    // Base URL for your backend API
+    const API_BASE_URL = 'http://localhost:3001/api'; // *** CORRECTED TO 5000 ***
+
+    // --- References to Modal Elements (NEW/UPDATED) ---
+    const patientDetailsModal = document.getElementById('patientDetailsModal');
+    const modalPatientDetails = document.getElementById('modalPatientDetails');
+    const closeModalButton = document.querySelector('#patientDetailsModal .close-button');
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const token = localStorage.getItem('token');
+        const userRole = localStorage.getItem('userRole');
+
+        // Authentication check
+        if (!token || userRole !== 'doctor') {
+            alert('Access Denied: Please log in as a doctor.');
+            window.location.href = 'login.html';
+            return; // Stop further execution
+        }
+
+        // Initial section display
+        showSection(0); // Show Dashboard by default
+
+        // Fetch initial dashboard stats (placeholders for now)
+        fetchDashboardStats();
+
+        // --- Event Listeners for the Modal (NEW/UPDATED) ---
+        if (closeModalButton) {
+            closeModalButton.addEventListener('click', () => {
+                patientDetailsModal.style.display = 'none'; // Hide the modal
+            });
+        }
+
+        // Close modal when clicking anywhere outside of the modal content
+        window.addEventListener('click', (event) => {
+            if (event.target == patientDetailsModal) {
+                patientDetailsModal.style.display = 'none';
+            }
+        });
+    });
+
+    // --- Helper for showing section alerts ---
+    function showAlert(alertDivId, message, type) {
+        const alertDiv = document.getElementById(alertDivId);
+        if (!alertDiv) {
+            console.error(`Alert div with ID "${alertDivId}" not found.`);
+            return;
+        }
+        alertDiv.textContent = message;
+        alertDiv.className = `alert alert-${type}`; // Use classes for styling
+        alertDiv.style.display = 'block';
+        setTimeout(() => { alertDiv.style.display = 'none'; }, 5000); // Hide after 5 seconds
+    }
+
+    // --- Dynamic Section Switching ---
+    function showSection(sectionIdx) {
+        // Hide all content sections
+        document.querySelectorAll('.main-content .section').forEach(sec => sec.classList.remove('active'));
+        // Show the target section
+        document.querySelectorAll('.main-content .section')[sectionIdx].classList.add('active');
+
+        // Update active state of navigation buttons
+        document.querySelectorAll('.sidebar nav ul li button').forEach(btn => btn.classList.remove('active'));
+        const activeBtn = document.querySelector(`.sidebar nav ul li button[data-section="${sectionIdx}"]`);
+        if (activeBtn) {
+            activeBtn.classList.add('active');
+        } else {
+            // Fallback for initial button (Dashboard) if it doesn't have data-section
+            if (sectionIdx === 0 && document.getElementById('dashboardBtn')) {
+                   document.getElementById('dashboardBtn').classList.add('active');
+            }
+        }
+    }
+
+    // Attach event listeners to navigation buttons using their IDs
+    document.getElementById('dashboardBtn').addEventListener('click', () => showSection(0));
+    document.getElementById('patientRecordsBtn').addEventListener('click', () => showSection(1));
+    document.getElementById('prescriptionsBtn').addEventListener('click', () => showSection(2));
+    document.getElementById('consultationNotesBtn').addEventListener('click', () => showSection(3));
+    document.getElementById('followUpsBtn').addEventListener('click', () => showSection(4));
+    document.getElementById('labResultsBtn').addEventListener('click', () => showSection(5));
+
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userRole');
+        alert('You have been logged out.');
+        window.location.href = 'login.html';
+    });
+
+
+    // --- Dashboard Stats (Placeholder) ---
+    async function fetchDashboardStats() {
+        // This is a placeholder. You'd fetch actual data from your backend.
+        document.getElementById('totalPatientsStat').textContent = '500+'; // Replace with actual data
+        document.getElementById('todayAppointmentsStat').textContent = '15'; // Replace with actual data
+    }
+
+    // --- Patient Search & Selection Helper Function ---
+    async function findPatient(queryType, queryValue) {
+        if (!queryValue) return null;
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('Authentication token missing. Please log in.');
+            window.location.href = 'login.html';
+            return null;
+        }
+
+        let queryParam;
+        if (queryType === 'name') {
+            queryParam = `name=${encodeURIComponent(queryValue)}`;
+        } else if (queryType === 'phoneNumber') {
+            queryParam = `phoneNumber=${encodeURIComponent(queryValue)}`;
+        } else if (queryType === 'emailAddress') {
+            queryParam = `emailAddress=${encodeURIComponent(queryValue)}`;
+        } else {
+            console.error('Invalid query type for patient search:', queryType);
+            return null;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/patients/search?${queryParam}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error(`Backend error searching for patient by ${queryType}:`, errorData);
+                throw new Error(errorData.message || 'Failed to search for patient.');
+            }
+
+            const patients = await response.json();
+            return patients; // Return array of matching patients
+        } catch (error) {
+            console.error(`Error finding patient by ${queryType}:`, error);
+            return null;
+        }
+    }
+
+
+    // --- 1. Patient Records Section Logic ---
+    const patientRecordsForm = document.getElementById('patientRecordsForm');
+    const searchPatientNameInput = document.getElementById('searchPatientName');
+    const patientRecordResultsDiv = document.getElementById('patientRecordResults');
+    const selectedPatientRecordDisplay = document.getElementById('selectedPatientRecord');
+    const patientRecordsAlert = document.getElementById('patientRecordsAlert');
+
+    if (patientRecordsForm) {
+        patientRecordsForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const searchTerm = searchPatientNameInput.value.trim();
+            patientRecordResultsDiv.style.display = 'none';
+            patientRecordResultsDiv.innerHTML = '';
+            selectedPatientRecordDisplay.style.display = 'none';
+            showAlert('patientRecordsAlert', '', 'success');
+            showAlert('patientRecordsAlert', '', 'error');
+
+            if (!searchTerm) {
+                showAlert('patientRecordsAlert', 'Please enter a patient name, email, or phone number.', 'error');
+                return;
+            }
+
+            try {
+                let patients = [];
+                let queryTypeUsed = '';
+
+                // Determine query type based on input format
+                if (searchTerm.includes('@')) {
+                    // Looks like an email
+                    patients = await findPatient('emailAddress', searchTerm);
+                    queryTypeUsed = 'emailAddress';
+                } else if (/^\+?[0-9\s()-]+$/.test(searchTerm)) {
+                    // Looks like a phone number (allows +, spaces, parentheses, dashes)
+                    patients = await findPatient('phoneNumber', searchTerm);
+                    queryTypeUsed = 'phoneNumber';
+                } else {
+                    // Assume it's a name
+                    patients = await findPatient('name', searchTerm);
+                    queryTypeUsed = 'name';
+                }
+
+                if (patients && patients.length > 0) {
+                    if (patients.length === 1) {
+                        // Automatically select if only one result
+                        displaySelectedPatientRecord(patients[0]);
+                    } else {
+                        // Show multiple results for selection
+                        patients.forEach(patient => {
+                            const resultItem = document.createElement('div');
+                            // Corrected string interpolation for displaying patient name and contact
+                            resultItem.textContent = `${patient.fullName} (${patient.emailAddress || patient.phoneNumber || 'N/A'})`;
+                            resultItem.dataset.patientId = patient._id;
+                            resultItem.dataset.patientName = patient.fullName;
+                            resultItem.addEventListener('click', () => {
+                                displaySelectedPatientRecord(patient);
+                                patientRecordResultsDiv.style.display = 'none'; // Hide results after selection
+                            });
+                            patientRecordResultsDiv.appendChild(resultItem);
+                        });
+                        patientRecordResultsDiv.style.display = 'block';
+                        showAlert('patientRecordsAlert', `Found ${patients.length} matching patients. Please select one.`, 'success');
+                    }
+                } else {
+                    showAlert('patientRecordsAlert', 'No patient found with the provided details.', 'error');
+                }
+            } catch (error) {
+                showAlert('patientRecordsAlert', `Error searching patient: ${error.message}`, 'error');
+            }
+        });
+    }
+
+    function displaySelectedPatientRecord(patient) {
+        selectedPatientRecordDisplay.innerHTML = `
+            <strong>Patient Name:</strong> ${patient.fullName}<br>
+            <strong>Date of Birth:</strong> ${patient.dateOfBirth ? new Date(patient.dateOfBirth).toLocaleDateString() : 'N/A'}<br>
+            <strong>Gender:</strong> ${patient.gender || 'N/A'}<br>
+            <strong>Contact:</strong> ${patient.phoneNumber || 'N/A'} / ${patient.emailAddress || 'N/A'}<br>
+            <strong>Address:</strong> ${patient.address || 'N/A'}<br>
+            <button class="action-btn" onclick="viewFullPatientDetails('${patient._id}')">View Full Details</button>
+        `;
+        selectedPatientRecordDisplay.style.display = 'block';
+        // Also, clear search results after selection
+        patientRecordResultsDiv.innerHTML = '';
+        patientRecordResultsDiv.style.display = 'none';
+    }
+
+    // --- UPDATED viewFullPatientDetails FUNCTION (REPLACES OLD ALERT) ---
+    async function viewFullPatientDetails(patientId) {
+        // 1. Show the modal with a loading message
+        modalPatientDetails.innerHTML = 'Loading patient details...';
+        patientDetailsModal.style.display = 'flex'; // Show the modal (using flex to center it)
+
+        // 2. Get the authentication token
+        const token = localStorage.getItem('token');
+        if (!token) {
+            showAlert('patientRecordsAlert', 'Authentication token missing. Please log in.', 'error');
+            patientDetailsModal.style.display = 'none'; // Hide modal if no token
+            window.location.href = 'login.html';
+            return;
+        }
+
+        try {
+            // 3. Make the API call to your backend
+            const response = await fetch(`${API_BASE_URL}/patients/${patientId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` // Include the JWT token for authentication
+                }
+            });
+
+            // 4. Check if the response was successful
+            if (!response.ok) {
+                const errorData = await response.json(); // Get error message from backend
+                throw new Error(errorData.message || `Failed to fetch patient details: ${response.statusText}`);
+            }
+
+            // 5. Parse the JSON response
+            const patient = await response.json();
+
+            // 6. Populate the modal with the fetched data
+            // Format dates nicely
+            const dob = patient.dateOfBirth ? new Date(patient.dateOfBirth).toLocaleDateString() : 'N/A';
+            const createdAt = patient.createdAt ? new Date(patient.createdAt).toLocaleDateString() : 'N/A';
+            const updatedAt = patient.updatedAt ? new Date(patient.updatedAt).toLocaleDateString() : 'N/A';
+
+            modalPatientDetails.innerHTML = `
+                <h3>${patient.fullName}</h3>
+                <p><strong>Patient ID:</strong> ${patient._id}</p>
+                <p><strong>Date of Birth:</strong> ${dob}</p>
+                <p><strong>Gender:</strong> ${patient.gender || 'N/A'}</p>
+                <p><strong>Mobile Number:</strong> ${patient.phoneNumber || 'N/A'}</p>
+                <p><strong>Email Address:</strong> ${patient.emailAddress || 'N/A'}</p>
+                <p><strong>Address:</strong> ${patient.address || 'N/A'}</p>
+                <p><strong>Blood Group:</strong> ${patient.bloodGroup || 'N/A'}</p>
+                <p><strong>Marital Status:</strong> ${patient.maritalStatus || 'N/A'}</p>
+                <p><strong>Nationality:</strong> ${patient.nationality || 'N/A'}</p>
+                <p><strong>Occupation:</strong> ${patient.occupation || 'N/A'}</p>
+                <p><strong>Religion:</strong> ${patient.religion || 'N/A'}</p>
+                <p><strong>Residential Address:</strong> ${patient.residentialAddress || 'N/A'}</p>
+                <p><strong>Emergency Contact:</strong> ${patient.emergencyContactName || 'N/A'} (${patient.relationshipToEmergencyContact || 'N/A'}) - ${patient.emergencyContactNumber || 'N/A'}</p>
+                <p><strong>Medical History:</strong> ${patient.medicalHistory || 'No medical history recorded.'}</p>
+                <p><strong>Current Medications:</strong> ${patient.currentMedications || 'No current medications.'}</p>
+                <p><strong>Allergies:</strong> ${patient.allergies || 'No known allergies.'}</p>
+                <p><strong>Registered On:</strong> ${createdAt}</p>
+                <p><strong>Last Updated:</strong> ${updatedAt}</p>
+                `;
+
+        } catch (error) {
+            console.error('Error fetching patient details:', error);
+            // Display an error message in the modal
+            modalPatientDetails.innerHTML = `<p style="color: red;">Failed to load patient details: ${error.message}</p>`;
+        }
+    }
+
+
+    // --- 2. Prescriptions & Reports Section Logic ---
+    const prescriptionForm = document.getElementById('prescriptionForm');
+    if (prescriptionForm) {
+        prescriptionForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const patientName = document.getElementById('prescriptionPatientName').value.trim();
+            const details = document.getElementById('prescriptionDetails').value.trim();
+            showAlert('prescriptionAlert', '', 'success'); // Clear previous alerts
+            showAlert('prescriptionAlert', '', 'error'); // Clear previous alerts
+
+            if (!patientName || !details) {
+                showAlert('prescriptionAlert', 'Please fill all prescription fields.', 'error');
+                return;
+            }
+
+            const token = localStorage.getItem('token');
+            if (!token) {
+                showAlert('prescriptionAlert', 'Authentication token missing. Please log in.', 'error');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                // First, find the patient to get their ID
+                const patients = await findPatient('name', patientName);
+                if (!patients || patients.length === 0) {
+                    showAlert('prescriptionAlert', 'Patient not found. Please verify the patient name.', 'error');
+                    return;
+                }
+                const patientId = patients[0]._id; // Assuming the first result is the correct patient
+
+                // Now, send the prescription data to the backend
+                const response = await fetch(`${API_BASE_URL}/prescriptions`, { // Adjust endpoint as per your backend
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` // Include JWT token
+                    },
+                    body: JSON.stringify({
+                        patientId: patientId,
+                        details: details, // This holds the prescription/report text
+                        // You might also send doctorId, date, etc., depending on your backend schema
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to add prescription/report.');
+                }
+
+                const result = await response.json();
+                console.log('Prescription/Report added:', result); // Log the response from backend
+                showAlert('prescriptionAlert', `Prescription/Report successfully added for ${patientName}!`, 'success');
+                this.reset(); // Clear the form
+            } catch (error) {
+                console.error('Error adding prescription/report:', error);
+                showAlert('prescriptionAlert', `Error: ${error.message}`, 'error');
+            }
+        });
+    }
+
+
+    // --- 3. Consultation Notes Section Logic ---
+    const patientNameSearchNotesInput = document.getElementById('patientNameSearchNotes');
+    const searchPatientBtn = document.getElementById('searchPatientBtn');
+    const consultationPatientSearchResultsDiv = document.getElementById('patientSearchResults');
+    const selectedPatientDisplay = document.getElementById('selectedPatientDisplay');
+    const selectedPatientIdNotesInput = document.getElementById('selectedPatientIdNotes');
+    const consultationNotesForm = document.getElementById('consultationNotesForm');
+    const notesInput = document.getElementById('notes');
+    const consultationNotesAlert = document.getElementById('consultationNotesAlert');
+
+    if (searchPatientBtn) {
+        searchPatientBtn.addEventListener('click', async () => {
+            const searchTerm = patientNameSearchNotesInput.value.trim();
+            consultationPatientSearchResultsDiv.style.display = 'none';
+            consultationPatientSearchResultsDiv.innerHTML = '';
+            selectedPatientDisplay.style.display = 'none';
+            selectedPatientIdNotesInput.value = '';
+            showAlert('consultationNotesAlert', '', 'success');
+            showAlert('consultationNotesAlert', '', 'error');
+
+            if (!searchTerm) {
+                showAlert('consultationNotesAlert', 'Please enter a patient name to search.', 'error');
+                return;
+            }
+
+            try {
+                const patients = await findPatient('name', searchTerm);
+                if (patients && patients.length > 0) {
+                    consultationPatientSearchResultsDiv.style.display = 'block';
+                    patients.forEach(patient => {
+                        const resultItem = document.createElement('div');
+                        resultItem.textContent = `${patient.fullName} (${patient.emailAddress || patient.phoneNumber || 'N/A'})`;
+                        resultItem.classList.add('patient-result-item');
+                        resultItem.addEventListener('click', () => {
+                            // Select patient from results
+                            selectedPatientDisplay.textContent = `Selected Patient: ${patient.fullName}`;
+                            selectedPatientDisplay.style.display = 'block';
+                            selectedPatientIdNotesInput.value = patient._id;
+                            consultationPatientSearchResultsDiv.style.display = 'none';
+                            consultationPatientSearchResultsDiv.innerHTML = '';
+                            showAlert('consultationNotesAlert', `Patient "${patient.fullName}" selected.`, 'success');
+                        });
+                        consultationPatientSearchResultsDiv.appendChild(resultItem);
+                    });
+                    showAlert('consultationNotesAlert', `Found ${patients.length} matching patients. Please select one.`, 'success');
+                } else {
+                    showAlert('consultationNotesAlert', 'No patient found with that name. Please verify.', 'error');
+                }
+            } catch (error) {
+                showAlert('consultationNotesAlert', `Error searching for patient: ${error.message}`, 'error');
+            }
+        });
+    }
+
+    if (consultationNotesForm) {
+        consultationNotesForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const patientId = selectedPatientIdNotesInput.value;
+            const notes = notesInput.value.trim();
+
+            showAlert('consultationNotesAlert', '', 'success');
+            showAlert('consultationNotesAlert', '', 'error');
+
+            if (!patientId) {
+                showAlert('consultationNotesAlert', 'Please search and select a patient first.', 'error');
+                return;
+            }
+            if (!notes) {
+                showAlert('consultationNotesAlert', 'Consultation notes are required.', 'error');
+                return;
+            }
+
+            const token = localStorage.getItem('token');
+            try {
+                const response = await fetch(`${API_BASE_URL}/consultationnotes`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ patientId, notes })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to save consultation notes.');
+                }
+
+                const result = await response.json();
+                showAlert('consultationNotesAlert', 'Consultation notes saved successfully!', 'success');
+                this.reset();
+                selectedPatientDisplay.style.display = 'none';
+                selectedPatientIdNotesInput.value = '';
+            } catch (error) {
+                console.error('Error saving consultation notes:', error);
+                showAlert('consultationNotesAlert', `Error: ${error.message}`, 'error');
+            }
+        });
+    }
+
+
+    // --- 4. Follow-ups Section Logic ---
+    const followUpForm = document.getElementById('followUpForm');
+     if (followUpForm) {
+        followUpForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const patientName = document.getElementById('followUpPatientName').value.trim();
+            const followUpDate = document.getElementById('followUpDate').value;
+            const followUpReason = document.getElementById('followUpReason').value.trim();
+            showAlert('followUpAlert', '', 'success');
+            showAlert('followUpAlert', '', 'error');
+
+            if (!patientName || !followUpDate || !followUpReason) {
+                showAlert('followUpAlert', 'Please provide patient name, follow-up date, and reason.', 'error');
+                return;
+            }
+
+            const token = localStorage.getItem('token');
+            if (!token) {
+                showAlert('followUpAlert', 'Authentication token missing. Please log in.', 'error');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                // First, find the patient to get their ID
+                const patients = await findPatient('name', patientName);
+                if (!patients || patients.length === 0) {
+                    showAlert('followUpAlert', 'Patient not found. Please verify the patient name.', 'error');
+                    return;
+                }
+                const patientId = patients[0]._id;
+
+                // Now, send the follow-up data to the backend
+                const response = await fetch(`${API_BASE_URL}/followups`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        patientId: patientId,
+                        followUpDate: followUpDate,
+                        reason: followUpReason
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to schedule follow-up.');
+                }
+
+                const result = await response.json();
+                console.log('Follow-up scheduled:', result);
+                showAlert('followUpAlert', `Follow-up successfully scheduled for ${patientName}!`, 'success');
+                this.reset();
+            } catch (error) {
+                console.error('Error scheduling follow-up:', error);
+                showAlert('followUpAlert', `Error scheduling follow-up: ${error.message}`, 'error');
+            }
+        });
+    }
+
+    // --- 5. Lab Results Section Logic (UPDATED FOR DOCTOR TO VIEW/SEARCH) ---
+    const searchLabResultsBtn = document.getElementById('searchLabResultsBtn');
+    const searchLabResultPatientNameInput = document.getElementById('searchLabResultPatientName');
+    const labResultsDisplayArea = document.getElementById('labResultsDisplayArea');
+    const currentLabResultsPatientNameSpan = document.getElementById('currentLabResultsPatientName');
+    const labResultsList = document.getElementById('labResultsList');
+    const noLabResultsMessage = document.getElementById('noLabResultsMessage');
+
+    if (searchLabResultsBtn) {
+        // Initially hide the results area (will be shown by JS on successful search)
+        labResultsDisplayArea.style.display = 'none';
+        noLabResultsMessage.style.display = 'none'; // Ensure this is hidden initially
+
+        searchLabResultsBtn.addEventListener('click', async function() {
+            const patientSearchTerm = searchLabResultPatientNameInput.value.trim();
+            showAlert('labResultsAlert', '', 'success'); // Clear previous alerts
+            showAlert('labResultsAlert', '', 'error');
+
+            if (!patientSearchTerm) {
+                showAlert('labResultsAlert', 'Please enter a patient name or ID to search.', 'error');
+                labResultsDisplayArea.style.display = 'none'; // Hide if search term is empty
+                return;
+            }
+
+            const token = localStorage.getItem('token');
+            if (!token) {
+                showAlert('labResultsAlert', 'Authentication token missing. Please log in.', 'error');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                // Step 1: Find the patient to get their ID
+                const patients = await findPatient('name', patientSearchTerm); // Assuming findPatient works with name, email, phone
+                if (!patients || patients.length === 0) {
+                    showAlert('labResultsAlert', 'Patient not found. Please verify the patient name or ID.', 'error');
+                    // Hide previous results
+                    labResultsDisplayArea.style.display = 'none';
+                    return;
+                }
+                const patientId = patients[0]._id;
+                currentLabResultsPatientNameSpan.textContent = patients[0].fullName || 'Unknown Patient'; // Fallback for name
+
+                // Step 2: Fetch lab results for the found patient
+                const response = await fetch(`${API_BASE_URL}/patients/${patientId}/lab-results`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `Failed to fetch lab results: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                console.log('Lab results fetched:', result);
+
+                // Clear previous results
+                labResultsList.innerHTML = '';
+                noLabResultsMessage.style.display = 'none'; // Reset message display
+
+                if (result.labResults && result.labResults.length > 0) {
+                    result.labResults.forEach(labResult => {
+                        const listItem = document.createElement('li');
+                        const resultDate = new Date(labResult.createdAt).toLocaleDateString();
+                        const resultTime = new Date(labResult.createdAt).toLocaleTimeString();
+                        // Construct the full URL to the static file
+                        const fileUrl = `${API_BASE_URL}${labResult.documentPath}`; // Assuming documentPath starts with /uploads/...
+
+                        listItem.innerHTML = `
+                            <strong>Test:</strong> ${labResult.testName || 'N/A'} <br>
+                            <strong>Remarks:</strong> ${labResult.remarks || 'No remarks'} <br>
+                            <strong>Uploaded:</strong> ${resultDate} at ${resultTime}
+                            <a href="${fileUrl}" target="_blank" class="action-btn" style="margin-left: 10px;">View Document</a>
+                        `;
+                        labResultsList.appendChild(listItem);
+                    });
+                    labResultsDisplayArea.style.display = 'block'; // Show the results area
+                    showAlert('labResultsAlert', `Lab results loaded for ${currentLabResultsPatientNameSpan.textContent}`, 'success');
+                } else {
+                    noLabResultsMessage.style.display = 'block'; // Show "No results" message
+                    labResultsDisplayArea.style.display = 'block'; // Still show the area, just with message
+                    showAlert('labResultsAlert', `No lab results found for ${currentLabResultsPatientNameSpan.textContent}.`, 'info'); // Use 'info' for no results
+                }
+
+            } catch (error) {
+                console.error('Error fetching lab results:', error);
+                showAlert('labResultsAlert', `Error fetching lab results: ${error.message}`, 'error');
+                labResultsDisplayArea.style.display = 'none'; // Hide results area on error
+            }
+        });
+    }
+</script>
+</body>
+</html>
